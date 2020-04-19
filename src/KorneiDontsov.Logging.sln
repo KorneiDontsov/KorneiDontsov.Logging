@@ -1,0 +1,24 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "libs", "libs", "{DF94A36C-B953-4DDF-B6D0-C3D013983925}"
+ProjectSection(SolutionItems) = preProject
+	libs\Directory.Build.props = libs\Directory.Build.props
+EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KorneiDontsov.Logging", "libs\KorneiDontsov.Logging\KorneiDontsov.Logging.csproj", "{243C49EB-2D0E-4073-A136-FC4AC001FA8E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{243C49EB-2D0E-4073-A136-FC4AC001FA8E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{243C49EB-2D0E-4073-A136-FC4AC001FA8E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{243C49EB-2D0E-4073-A136-FC4AC001FA8E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{243C49EB-2D0E-4073-A136-FC4AC001FA8E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{243C49EB-2D0E-4073-A136-FC4AC001FA8E} = {DF94A36C-B953-4DDF-B6D0-C3D013983925}
+	EndGlobalSection
+EndGlobal
