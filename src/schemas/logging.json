@@ -1,0 +1,119 @@
+﻿{
+	"$schema": "http://json-schema.org/draft-07/schema#",
+	"definitions": {
+		"sync": {
+			"description": "Indicates how events are logged: synchronously or asynchronously. Default value is false.",
+			"type": "boolean",
+			"default": false
+		},
+		"output": {
+			"title": "Output template",
+			"description": "Read more at https://github.com/serilog/serilog/wiki/Formatting-Output",
+			"type": "array",
+			"minItems": 1,
+			"items": {
+				"type": "string"
+			}
+		}
+	},
+	"type": "object",
+	"properties": {
+		"profiles": {
+			"type": "object",
+			"patternProperties": {
+				".*": {
+					"type": "object",
+					"properties": {
+						"minLevel": {
+							"type": "string",
+							"enum": [
+								"verbose",
+								"debug",
+								"information",
+								"warning",
+								"error",
+								"fatal"
+							]
+						},
+						"type": {
+							"type": "string",
+							"enum": [
+								"console",
+								"file"
+							]
+						}
+					},
+					"allOf": [
+						{
+							"if": {
+								"properties": {
+									"type": {
+										"const": "console"
+									}
+								}
+							},
+							"then": {
+								"properties": {
+									"sync": {
+										"$ref": "#/definitions/sync"
+									},
+									"output": {
+										"$ref": "#/definitions/output"
+									}
+								}
+							}
+						},
+						{
+							"if": {
+								"properties": {
+									"type": {
+										"const": "file"
+									}
+								}
+							},
+							"then": {
+								"properties": {
+									"sync": {
+										"$ref": "#/definitions/sync"
+									},
+									"output": {
+										"$ref": "#/definitions/output"
+									},
+									"path": {
+										"description": "File path template. Use {app} to insert application name, {launchUtc} - launch timestamp in UTC formatted as 'yyyy-MM-ddThhmmss.fff'.",
+										"type": "string"
+									},
+									"maxSize": {
+										"description": "Maximum size of file. If reached then new file is created.",
+										"type": [
+											"null",
+											"integer"
+										],
+										"minimum": 1
+									}
+								}
+							}
+						}
+					]
+				}
+			}
+		},
+		"enrichments": {
+			"type": "object",
+			"properties": {
+				"thread": {
+					"description": "Thread id and name enriched as 'ThreadId' and 'ThreadName'. True to enrich, false to not.",
+					"type": "boolean"
+				},
+				"timestamp": {
+					"description": "Timestamp of log event enriched as 'Timestamp'. String value specifies format in which to enrich, null - not to enrich.",
+					"type": [
+						"null",
+						"string"
+					],
+					"default": "yyyy-MM-ddThh:mm:ss.fffzzz"
+				}
+			}
+		}
+	}
+}
