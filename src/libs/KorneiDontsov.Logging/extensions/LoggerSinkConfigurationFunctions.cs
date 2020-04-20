@@ -8,7 +8,8 @@ namespace KorneiDontsov.Logging {
 
 	public static class LoggerSinkConfigurationFunctions {
 		public static void SyncOrAsync
-			(this LoggerSinkConfiguration sinkConfiguration, Boolean sync,
+			(this LoggerSinkConfiguration sinkConfiguration,
+			 Boolean sync,
 			 Action<LoggerSinkConfiguration> configure) {
 			if(sync)
 				configure(sinkConfiguration);

@@ -70,25 +70,33 @@ namespace KorneiDontsov.Logging {
 			return loggerConf.CreateLogger();
 		}
 
-		class ConfiguredLoggerFactory {
-			IConfiguration configuration { get; }
-			IEnumerable<ILoggingProfileApplier> profileAppliers { get; }
-			IEnumerable<ILoggingEnrichmentApplier> enrichmentAppliers { get; }
+		/// <exception cref = "LoggingConfigurationException" />
+		public static Logger CreateSharedConfiguredLogger
+			(IConfiguration conf,
+			 IEnumerable<ILoggingProfileApplier> profileAppliers,
+			 IEnumerable<ILoggingEnrichmentApplier> enrichmentAppliers) {
+			var logger = CreateConfiguredLogger(conf, profileAppliers, enrichmentAppliers);
+			Log.Logger = logger;
+			return logger;
+		}
+
+		class ConfiguredLoggerFactory: SerilogLoggerFactory, IDisposable {
+			public Logger logger { get; }
+
+			ConfiguredLoggerFactory (Logger logger):
+				base(logger) =>
+				this.logger = logger;
 
 			public ConfiguredLoggerFactory
 				(IConfiguration configuration,
 				 IEnumerable<ILoggingProfileApplier> profileAppliers,
-				 IEnumerable<ILoggingEnrichmentApplier> enrichmentAppliers) {
-				this.configuration = configuration;
-				this.profileAppliers = profileAppliers;
-				this.enrichmentAppliers = enrichmentAppliers;
-			}
+				 IEnumerable<ILoggingEnrichmentApplier> enrichmentAppliers):
+				this(CreateSharedConfiguredLogger(configuration, profileAppliers, enrichmentAppliers)) { }
 
-			public Logger Create () {
-				var logger =
-					CreateConfiguredLogger(configuration.GetSection("logging"), profileAppliers, enrichmentAppliers);
-				Log.Logger = logger;
-				return logger;
+			void IDisposable.Dispose () {
+				base.Dispose();
+				Log.CloseAndFlush();
+				logger.Dispose();
 			}
 		}
 
@@ -101,9 +109,12 @@ namespace KorneiDontsov.Logging {
 						.AddTransient<ILoggingProfileApplier, LogFileProfileApplier>()
 						.AddTransient<ILoggingEnrichmentApplier, ThreadEnrichmentApplier>()
 						.AddTransient<ILoggingEnrichmentApplier, TimestampEnrichmentApplier>()
-						.AddTransient<ConfiguredLoggerFactory>()
-						.AddSingleton<ILogger>(p => p.GetRequiredService<ConfiguredLoggerFactory>().Create())
+						.AddSingleton<ConfiguredLoggerFactory>()
+						.AddSingleton<ILogger>(
+							p => p.GetRequiredService<ConfiguredLoggerFactory>().logger)
+						.AddSingleton(
+							p => new AotLogger(p.GetRequiredService<ILogger>()))
 						.AddSingleton<Microsoft.Extensions.Logging.ILoggerFactory>(
-							p => new SerilogLoggerFactory(p.GetRequiredService<ILogger>())));
+							p => p.GetRequiredService<ConfiguredLoggerFactory>()));
 	}
 }

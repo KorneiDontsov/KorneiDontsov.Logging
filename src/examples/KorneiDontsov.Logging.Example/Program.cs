@@ -7,11 +7,13 @@ namespace KorneiDontsov.Logging.Example {
 	using System;
 
 	class Program {
-		static void Main (String[] args) =>
+		static void Main (String[] args) {
+			CrashLogger.Activate();
 			Host.CreateDefaultBuilder(args)
 				.UseConfiguredLogger()
 				.ConfigureServices(services => services.AddHostedService<ServiceExample>())
 				.Build()
 				.Run();
+		}
 	}
 }

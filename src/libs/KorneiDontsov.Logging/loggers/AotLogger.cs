@@ -8,10 +8,11 @@ namespace KorneiDontsov.Logging {
 	using System;
 	using System.Collections.Generic;
 
+	/// <inheritdoc />
 	/// <summary>
-	///     AOT compatible logger that decorates <see cref = "ILogger" />.
+	///     AOT compatible logger that decorates <see cref="T:Serilog.ILogger" />.
 	/// </summary>
-	public sealed class AotLogger {
+	public sealed class AotLogger: IDisposable {
 		readonly Logger? fastImpl;
 
 		readonly ILogger impl;
@@ -28,6 +29,12 @@ namespace KorneiDontsov.Logging {
 		// ReSharper disable once InconsistentNaming
 		public static AotLogger None { get; } =
 			new AotLogger(Logger.None);
+
+		/// <inheritdoc />
+		public void Dispose () {
+			if(fastImpl is {}) fastImpl.Dispose();
+			else if(impl is IDisposable disposableImpl) disposableImpl.Dispose();
+		}
 
 		/// <inheritdoc cref = "ILogger.ForContext(ILogEventEnricher)" />
 		public AotLogger ForContext (ILogEventEnricher enricher) =>
