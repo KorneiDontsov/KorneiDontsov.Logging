@@ -79,7 +79,7 @@ class Program {
 }
 ```
 
-`UseConfiguredLogger()` registeres `ILogger` to services and configures it.
+`UseConfiguredLogger()` registers `ILogger` to services and configures it.
 By default you can write to file and console, enrich thread id, thread name and
 timestamp. But you can add your own profile types and enrichements implementing
 and registering `ILoggingProfileApplier` and `ILoggingEnrichmentApplier`.
