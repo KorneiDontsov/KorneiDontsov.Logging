@@ -9,7 +9,7 @@
 	<PropertyGroup>
 		<RepositoryUrl>https://github.com/KorneiDontsov/KorneiDontsov.Logging</RepositoryUrl>
 		<Authors>KorneiDontsov</Authors>
-		<Copyright>Copyright © Kornei Dontsov 2019</Copyright>
+		<Copyright>Copyright © Kornei Dontsov 2020</Copyright>
 		<PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
 		<IncludeSymbols>true</IncludeSymbols>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
