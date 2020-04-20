@@ -12,7 +12,7 @@
 
 	<PropertyGroup>
 		<Title>KorneiDontsov.Logging</Title>
-		<Description>Tools for logging with Serilog.</Description>
+		<Description>Tools for logging based on Serilog.</Description>
 	</PropertyGroup>
 
 	<ItemGroup>
