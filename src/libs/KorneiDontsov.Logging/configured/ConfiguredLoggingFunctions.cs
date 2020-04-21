@@ -7,7 +7,6 @@ namespace KorneiDontsov.Logging {
 	using Microsoft.Extensions.Hosting;
 	using Serilog;
 	using Serilog.Core;
-	using Serilog.Extensions.Logging;
 	using System;
 	using System.Collections.Generic;
 
@@ -78,26 +77,6 @@ namespace KorneiDontsov.Logging {
 			var logger = CreateConfiguredLogger(conf, profileAppliers, enrichmentAppliers);
 			Log.Logger = logger;
 			return logger;
-		}
-
-		class ConfiguredLoggerFactory: SerilogLoggerFactory, IDisposable {
-			public Logger logger { get; }
-
-			ConfiguredLoggerFactory (Logger logger):
-				base(logger) =>
-				this.logger = logger;
-
-			public ConfiguredLoggerFactory
-				(IConfiguration configuration,
-				 IEnumerable<ILoggingProfileApplier> profileAppliers,
-				 IEnumerable<ILoggingEnrichmentApplier> enrichmentAppliers):
-				this(CreateSharedConfiguredLogger(configuration, profileAppliers, enrichmentAppliers)) { }
-
-			void IDisposable.Dispose () {
-				base.Dispose();
-				Log.CloseAndFlush();
-				logger.Dispose();
-			}
 		}
 
 		public static IHostBuilder UseConfiguredLogger (this IHostBuilder hostBuilder) =>
