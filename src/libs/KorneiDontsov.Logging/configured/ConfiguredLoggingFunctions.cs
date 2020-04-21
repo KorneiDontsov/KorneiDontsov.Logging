@@ -88,12 +88,16 @@ namespace KorneiDontsov.Logging {
 						.AddTransient<ILoggingProfileApplier, LogFileProfileApplier>()
 						.AddTransient<ILoggingEnrichmentApplier, ThreadEnrichmentApplier>()
 						.AddTransient<ILoggingEnrichmentApplier, TimestampEnrichmentApplier>()
-						.AddSingleton<ConfiguredLoggerFactory>()
-						.AddSingleton<ILogger>(
-							p => p.GetRequiredService<ConfiguredLoggerFactory>().logger)
+						.AddSingleton<Microsoft.Extensions.Logging.ILoggerFactory, ConfiguredLoggerFactory>()
+						.AddSingleton<ILogger?>(
+							provider => {
+								var loggerFactory = provider.GetService<Microsoft.Extensions.Logging.ILoggerFactory>();
+								return (loggerFactory as ConfiguredLoggerFactory)?.logger;
+							})
 						.AddSingleton(
-							p => new AotLogger(p.GetRequiredService<ILogger>()))
-						.AddSingleton<Microsoft.Extensions.Logging.ILoggerFactory>(
-							p => p.GetRequiredService<ConfiguredLoggerFactory>()));
+							provider => {
+								var logger = provider.GetService<ILogger?>();
+								return logger is {} ? new AotLogger(logger) : null;
+							}));
 	}
 }
