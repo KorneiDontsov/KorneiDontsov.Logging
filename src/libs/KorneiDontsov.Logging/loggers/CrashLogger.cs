@@ -17,15 +17,15 @@ namespace KorneiDontsov.Logging {
 					? sharedLogger
 					: new LoggerConfiguration()
 						.WriteTo.File(
-							$"CRASH_{Assembly.GetEntryAssembly().GetName().Name}_{timestamp.UtcDateTime:yyyy-MM-ddThhmmss.fff}.log")
+							$"CRITICAL/CRASH_{Assembly.GetEntryAssembly().GetName().Name}_{timestamp.UtcDateTime:yyyy-MM-ddThhmmss.fff}.log")
 						.CreateLogger();
 			try {
 				logger.Fatal(exception, "Unhandled exception raised at {RaiseTimestamp}.", new Object?[] { timestamp });
 			}
 			finally {
+				Log.CloseAndFlush();
 				(logger as IDisposable)?.Dispose();
 				(sharedLogger as IDisposable)?.Dispose();
-				Log.CloseAndFlush();
 			}
 		}
 
