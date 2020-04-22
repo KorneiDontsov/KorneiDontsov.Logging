@@ -93,7 +93,7 @@ configured logging on platforms where you do not use
 `CrashLogger` handles unhandled exceptions and unobserved task exceptions, and logs them
 to shared `Serilog.Log.Logger` before the process is terminated. If shared logger does
 not handle `Fatal` errors then `CrashLogger` logs to file with name like
-`CRASH_{app}_{timestamp}.log` in application directory.
+`CRITICAL/CRASH_{app}_{timestamp}.log` in application directory.
 
 To activate `CrashLogger` you have to invoke
 
