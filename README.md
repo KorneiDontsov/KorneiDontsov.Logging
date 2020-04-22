@@ -90,15 +90,22 @@ configured logging on platforms where you do not use
 
 ## CrashLogger
 
-`CrashLogger` handles unhandled exceptions and unobserved task exceptions, and logs them
-to shared `Serilog.Log.Logger` before the process is terminated. If shared logger does
-not handle `Fatal` errors then `CrashLogger` logs to file with name like
-`CRITICAL/CRASH_{app}_{timestamp}.log` in application directory.
-
 To activate `CrashLogger` you have to invoke
 
 ```c#
 CrashLogger.Activate();
+```
+
+`CrashLogger` handles unhandled exceptions and unobserved task exceptions, and logs them
+to shared `Serilog.Log.Logger` before the process is terminated. If shared logger does
+not handle `Fatal` errors then `CrashLogger` logs to file with name like
+`logs/critical/UnhandledException_{app}_{timestamp}.log` in application directory.
+
+Also you can customize root path of critical logs:
+
+```c#
+var customPath = "var/critical-logs";
+CrashLogger.Activate(customPath);
 ```
 
 It's recommended to activate `CrashLogger` before any other code is executed.
