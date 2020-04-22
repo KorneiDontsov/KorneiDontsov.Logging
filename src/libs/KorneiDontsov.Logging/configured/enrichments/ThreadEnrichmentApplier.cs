@@ -6,7 +6,7 @@ namespace KorneiDontsov.Logging {
 	using Serilog.Configuration;
 	using System;
 
-	class ThreadEnrichmentApplier: ILoggingEnrichmentApplier {
+	public sealed class ThreadEnrichmentApplier: ILoggingEnrichmentApplier {
 		/// <inheritdoc />
 		public String enrichmentName =>
 			"thread";

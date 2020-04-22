@@ -6,7 +6,7 @@ namespace KorneiDontsov.Logging {
 	using Serilog.Configuration;
 	using System;
 
-	class TimestampEnrichmentApplier: ILoggingEnrichmentApplier {
+	public sealed class TimestampEnrichmentApplier: ILoggingEnrichmentApplier {
 		/// <inheritdoc />
 		public String enrichmentName =>
 			"timestamp";
