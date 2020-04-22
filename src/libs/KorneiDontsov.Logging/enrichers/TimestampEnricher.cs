@@ -6,7 +6,7 @@ namespace KorneiDontsov.Logging {
 	using Serilog.Events;
 	using System;
 
-	class TimestampEnricher: ILogEventEnricher {
+	public sealed class TimestampEnricher: ILogEventEnricher {
 		readonly String format;
 
 		public TimestampEnricher (String format) =>

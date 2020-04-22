@@ -87,8 +87,13 @@ namespace KorneiDontsov.Logging {
 				throw new LoggingConfigurationException($"'{profileConf}:output' is not a string array.");
 			else {
 				var sb = new StringBuilder(256);
-				foreach(var outputArrItem in outputArrItems)
-					sb.Append(outputArrItem.Value).Append("{NewLine}");
+				using var e = outputArrItems.GetEnumerator();
+
+				e.MoveNext();
+				sb.Append(e.Current.Value);
+
+				while(e.MoveNext()) sb.Append("{NewLine}").Append(e.Current.Value);
+
 				return sb.ToString();
 			}
 		}

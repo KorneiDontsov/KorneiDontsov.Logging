@@ -6,7 +6,7 @@ namespace KorneiDontsov.Logging {
 	using Serilog.Events;
 	using System;
 
-	class ThreadIdEnricher: ILogEventEnricher {
+	public sealed class ThreadIdEnricher: ILogEventEnricher {
 		/// <inheritdoc />
 		public void Enrich (LogEvent logEvent, ILogEventPropertyFactory propertyFactory) {
 			var threadId = Environment.CurrentManagedThreadId;

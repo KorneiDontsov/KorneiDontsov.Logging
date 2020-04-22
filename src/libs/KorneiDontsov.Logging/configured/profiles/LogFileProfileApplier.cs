@@ -9,7 +9,7 @@ namespace KorneiDontsov.Logging {
 	using System.Text.RegularExpressions;
 	using static System.String;
 
-	class LogFileProfileApplier: ILoggingProfileApplier {
+	public sealed class LogFileProfileApplier: ILoggingProfileApplier {
 		public LoggingAppEnvironment environment { get; }
 
 		public LogFileProfileApplier (LoggingAppEnvironment environment) =>

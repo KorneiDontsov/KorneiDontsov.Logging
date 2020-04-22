@@ -6,7 +6,7 @@ namespace KorneiDontsov.Logging {
 	using Serilog.Events;
 	using System.Threading;
 
-	class ThreadNameEnricher: ILogEventEnricher {
+	public sealed class ThreadNameEnricher: ILogEventEnricher {
 		/// <inheritdoc />
 		public void Enrich (LogEvent logEvent, ILogEventPropertyFactory propertyFactory) {
 			if(Thread.CurrentThread.Name is {} threadName)
