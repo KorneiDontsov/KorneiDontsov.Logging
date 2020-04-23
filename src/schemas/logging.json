@@ -104,14 +104,6 @@
 				"thread": {
 					"description": "Thread id and name enriched as 'ThreadId' and 'ThreadName'. True to enrich, false to not.",
 					"type": "boolean"
-				},
-				"timestamp": {
-					"description": "Timestamp of log event enriched as 'Timestamp'. String value specifies format in which to enrich, null - not to enrich.",
-					"type": [
-						"null",
-						"string"
-					],
-					"default": "yyyy-MM-ddThh:mm:ss.fffzzz"
 				}
 			}
 		}

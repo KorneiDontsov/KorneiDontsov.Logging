@@ -6,15 +6,11 @@ namespace KorneiDontsov.Logging {
 	using Serilog.Events;
 	using System;
 
+	[Obsolete("Not supported. It cannot work since 'Timestamp' cannot be overriden.")]
 	public sealed class TimestampEnricher: ILogEventEnricher {
-		readonly String format;
-
-		public TimestampEnricher (String format) =>
-			this.format = format;
+		public TimestampEnricher (String format) { }
 
 		/// <inheritdoc />
-		public void Enrich (LogEvent logEvent, ILogEventPropertyFactory propertyFactory) =>
-			logEvent.AddPropertyIfAbsent(
-				new LogEventProperty("Timestamp", new ScalarValue(logEvent.Timestamp.ToString(format))));
+		public void Enrich (LogEvent logEvent, ILogEventPropertyFactory propertyFactory) { }
 	}
 }

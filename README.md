@@ -18,11 +18,10 @@ useful, easy to change and extend.
 
 ```json
 {
-    "$schema": "https://raw.githubusercontent.com/KorneiDontsov/KorneiDontsov.Logging/v1.0.0/src/schemas/appsettings.json",
+    "$schema": "https://raw.githubusercontent.com/KorneiDontsov/KorneiDontsov.Logging/v1.2.1/src/schemas/appsettings.json",
     "logging": {
         "enrichments": {
-            "thread": true,
-            "timestamp": "yyyy-MM-ddThh:mm:ss.fff zzz"
+            "thread": true
         },
         "profiles": {
             "defaultConsole": {

@@ -6,23 +6,13 @@ namespace KorneiDontsov.Logging {
 	using Serilog.Configuration;
 	using System;
 
+	[Obsolete("Not supported. It cannot work since 'Timestamp' cannot be overriden.")]
 	public sealed class TimestampEnrichmentApplier: ILoggingEnrichmentApplier {
 		/// <inheritdoc />
 		public String enrichmentName =>
 			"timestamp";
 
 		/// <inheritdoc />
-		public void Apply (LoggerEnrichmentConfiguration enrich, IConfigurationSection conf) {
-			if(conf.Value is {} timestampFormat) {
-				try {
-					_ = DateTimeOffset.Now.ToString(timestampFormat);
-				}
-				catch(FormatException ex) {
-					throw new LoggingConfigurationException($"Value '{conf.Path}' has invalid format.", ex);
-				}
-
-				enrich.With(new TimestampEnricher(timestampFormat));
-			}
-		}
+		public void Apply (LoggerEnrichmentConfiguration enrich, IConfigurationSection conf) { }
 	}
 }
