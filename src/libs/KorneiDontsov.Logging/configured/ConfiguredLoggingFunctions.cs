@@ -87,7 +87,6 @@ namespace KorneiDontsov.Logging {
 						.AddTransient<ILoggingProfileApplier, ConsoleProfileApplier>()
 						.AddTransient<ILoggingProfileApplier, LogFileProfileApplier>()
 						.AddTransient<ILoggingEnrichmentApplier, ThreadEnrichmentApplier>()
-						.AddTransient<ILoggingEnrichmentApplier, TimestampEnrichmentApplier>()
 						.AddSingleton<Microsoft.Extensions.Logging.ILoggerFactory, ConfiguredLoggerFactory>()
 						.AddSingleton<ILogger?>(
 							provider => {
