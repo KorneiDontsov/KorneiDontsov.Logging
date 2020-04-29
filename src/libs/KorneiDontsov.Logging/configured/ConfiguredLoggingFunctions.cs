@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 namespace KorneiDontsov.Logging {
+	using Destructurama;
 	using Microsoft.Extensions.Configuration;
 	using Microsoft.Extensions.DependencyInjection;
 	using Microsoft.Extensions.Hosting;
@@ -42,7 +43,10 @@ namespace KorneiDontsov.Logging {
 					enrichmentAppliersMap.Add(enrichmentName, enrichmentApplier);
 			}
 
-			var loggerConf = new LoggerConfiguration().Enrich.FromLogContext();
+			var loggerConf =
+				new LoggerConfiguration()
+					.Destructure.UsingAttributes()
+					.Enrich.FromLogContext();
 
 			var profileConfs = conf.GetSection("profiles").GetChildren();
 			foreach(var profileConfRaw in profileConfs) {
