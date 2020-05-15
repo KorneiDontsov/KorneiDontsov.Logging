@@ -21,7 +21,7 @@ useful, easy to change and extend.
 
 ```json
 {
-    "$schema": "https://raw.githubusercontent.com/KorneiDontsov/KorneiDontsov.Logging/v1.2.1/src/schemas/appsettings.json",
+    "$schema": "https://raw.githubusercontent.com/KorneiDontsov/KorneiDontsov.Logging/v1.4.0/src/schemas/appsettings.json",
     "logging": {
         "enrichments": {
             "thread": true
@@ -48,7 +48,7 @@ useful, easy to change and extend.
                     "Properties: {Properties}",
                     "{Exception}"
                 ],
-                "path": "log/{app}_{launchUtc}.log",
+                "path": "logs/{app}_{launchUtc}.log",
                 "maxSize": 10485760
             },
             "errorFile": {
@@ -60,7 +60,7 @@ useful, easy to change and extend.
                     "Properties: {Properties}",
                     "{Exception}"
                 ],
-                "path": "log/{app}_{launchUtc}_errors.log",
+                "path": "logs/errors/{app}_{launchUtc}.log",
                 "maxSize": 10485760
             }
         }
