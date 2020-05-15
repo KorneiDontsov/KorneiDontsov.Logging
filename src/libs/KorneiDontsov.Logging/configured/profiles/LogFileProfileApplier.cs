@@ -44,7 +44,7 @@ namespace KorneiDontsov.Logging {
 					match =>
 						match.Groups[1].Value.ToLowerInvariant() switch {
 							"app" => environment.appName,
-							"launchutc" => environment.launchTimestamp.UtcDateTime.ToString("yyyy-MM-ddThhmmss.fff")
+							"launchutc" => environment.launchTimestamp.UtcDateTime.ToString("yyyy-MM-ddTHHmmss.fff")
 						},
 					RegexOptions.IgnoreCase);
 			if(filePath.IndexOfAny(Path.GetInvalidPathChars()) is var invalidCharIndex
