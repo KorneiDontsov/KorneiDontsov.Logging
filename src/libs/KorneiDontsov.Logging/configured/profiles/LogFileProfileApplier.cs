@@ -62,19 +62,48 @@ namespace KorneiDontsov.Logging {
 						: Path.Combine(environment.contentRootPath, filePath);
 
 				Int64 maxFileSize;
-				if(conf["maxSize"] is {} maxSizeStr)
+				if(conf["maxSize"] is {} maxFileSizeStr)
 					try {
-						maxFileSize = Int64.Parse(maxSizeStr);
+						maxFileSize = Int64.Parse(maxFileSizeStr);
+						if(maxFileSize <= 0) {
+							var msg = $"'{conf.Path}:maxFileSize' = '{maxFileSize}' is not positive.";
+							throw new LoggingConfigurationException(msg);
+						}
 					}
 					catch(FormatException ex) {
-						throw new LoggingConfigurationException($"'{conf.Path}:maxSize' is not a number.", ex);
+						var msg = $"'{conf.Path}:maxSize' = '{maxFileSizeStr}' is not a number.";
+						throw new LoggingConfigurationException(msg, ex);
 					}
 					catch(OverflowException ex) {
-						var msg = $"'{conf.Path}:maxSize' is out of range of 64-bit number.";
+						var msg = $"'{conf.Path}:maxSize' = '{maxFileSizeStr}' is out of range of 64-bit number.";
 						throw new LoggingConfigurationException(msg, ex);
 					}
 				else
 					maxFileSize = 1L * 1024 * 1024 * 1024;
+
+				Int32? retainedFileCountLimit;
+				if(conf["retainedFileCountLimit"] is {} retainedFileCountLimitStr)
+					try {
+						retainedFileCountLimit = Int32.Parse(retainedFileCountLimitStr);
+						if(retainedFileCountLimit <= 0) {
+							var msg =
+								$"'{conf.Path}:retainedFileCountLimit' = '{retainedFileCountLimit}' is not positive.";
+							throw new LoggingConfigurationException(msg);
+						}
+					}
+					catch(FormatException ex) {
+						var msg =
+							$"'{conf.Path}:retainedFileCountLimit' = '{retainedFileCountLimitStr}' is not a number.";
+						throw new LoggingConfigurationException(msg, ex);
+					}
+					catch(OverflowException ex) {
+						var msg =
+							$"'{conf.Path}:retainedFileCountLimit' = '{retainedFileCountLimitStr}'"
+							+ " is out of range of 32-bit number.";
+						throw new LoggingConfigurationException(msg, ex);
+					}
+				else
+					retainedFileCountLimit = null;
 
 				writeTo.SyncOrAsync(
 					isSync,
@@ -84,7 +113,8 @@ namespace KorneiDontsov.Logging {
 							conf.minLevel,
 							outputTemplate,
 							fileSizeLimitBytes: maxFileSize,
-							rollOnFileSizeLimit: true));
+							rollOnFileSizeLimit: true,
+							retainedFileCountLimit: retainedFileCountLimit));
 			}
 		}
 	}

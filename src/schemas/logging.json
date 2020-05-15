@@ -84,12 +84,21 @@
 										"type": "string"
 									},
 									"maxSize": {
-										"description": "Maximum size of file. If reached then new file is created.",
+										"description": "Maximum size of file in bytes. If reached then new file is created.",
 										"type": [
 											"null",
 											"integer"
 										],
 										"minimum": 1
+									},
+									"retainedFileCountLimit": {
+										"description": "Maximum count of log files that will be retained after a new file created. Old files will be deleted. If null specified then the files are not deleted at all.",
+										"type": [
+											"null",
+											"integer"
+										],
+										"minimum": 1,
+										"default": null
 									}
 								}
 							}
