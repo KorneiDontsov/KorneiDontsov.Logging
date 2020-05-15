@@ -2,6 +2,9 @@
 
 Tools for logging based on [Serilog](https://github.com/serilog/serilog).
 
+[![NuGet version](https://img.shields.io/nuget/v/KorneiDontsov.Logging.svg?style=for-the-badge)](https://www.nuget.org/packages/KorneiDontsov.Logging/)
+[![NuGet status](https://img.shields.io/nuget/dt/KorneiDontsov.Logging?style=for-the-badge)](https://www.nuget.org/packages/KorneiDontsov.Logging/)
+
 ## Configured logging
 
 `Serilog` stands for configuring by code using fluent API. It's good that
