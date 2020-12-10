@@ -24,12 +24,14 @@ namespace KorneiDontsov.Logging {
 		public ConfiguredLoggerFactory
 			(IConfiguration configuration,
 			 IEnumerable<ILoggingProfileApplier> profileAppliers,
-			 IEnumerable<ILoggingEnrichmentApplier> enrichmentAppliers):
+			 IEnumerable<ILoggingEnrichmentApplier> enrichmentAppliers,
+			 IEnumerable<ILoggingFilterApplier> filterAppliers):
 			this(
 				CreateSharedConfiguredLogger(
 					configuration.GetSection("logging"),
 					profileAppliers,
-					enrichmentAppliers)) { }
+					enrichmentAppliers,
+					filterAppliers)) { }
 
 		void IDisposable.Dispose () {
 			Log.CloseAndFlush();

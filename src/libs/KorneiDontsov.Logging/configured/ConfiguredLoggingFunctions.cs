@@ -16,7 +16,8 @@ namespace KorneiDontsov.Logging {
 		public static Logger CreateConfiguredLogger
 			(IConfiguration conf,
 			 IEnumerable<ILoggingProfileApplier> profileAppliers,
-			 IEnumerable<ILoggingEnrichmentApplier> enrichmentAppliers) {
+			 IEnumerable<ILoggingEnrichmentApplier> enrichmentAppliers,
+			 IEnumerable<ILoggingFilterApplier> filterAppliers) {
 			var profileAppliersMap = new Dictionary<String, ILoggingProfileApplier>();
 			foreach(var profileApplier in profileAppliers) {
 				var profileTypeName = profileApplier.profileTypeName.ToLowerInvariant();
@@ -41,6 +42,19 @@ namespace KorneiDontsov.Logging {
 				}
 				else
 					enrichmentAppliersMap.Add(enrichmentName, enrichmentApplier);
+			}
+
+			var filterAppliersMap = new Dictionary<String, ILoggingFilterApplier>();
+			foreach(var filterApplier in filterAppliers) {
+				var filterName = filterApplier.filterName.ToLowerInvariant();
+				if(filterAppliersMap.TryGetValue(filterName, out var otherApplier)) {
+					var msg =
+						$"{filterApplier.GetType()} cannot handle filter '{filterName}' "
+						+ $"because it's already handled by {otherApplier.GetType()}.";
+					throw new ArgumentException(msg, nameof(filterAppliers));
+				}
+				else
+					filterAppliersMap.Add(filterName, filterApplier);
 			}
 
 			var loggerConf =
@@ -70,6 +84,17 @@ namespace KorneiDontsov.Logging {
 				}
 			}
 
+			var filtersConf = conf.GetSection("filters").GetChildren();
+			foreach(var filterConf in filtersConf) {
+				var filterName = filterConf.Key.ToLowerInvariant();
+				if(filterAppliersMap.TryGetValue(filterName, out var filterApplier))
+					filterApplier.Apply(loggerConf.Filter, filterConf);
+				else {
+					var msg = $"'{filterConf.Path}:type': filter '{filterName}' is not known.";
+					throw new LoggingConfigurationException(msg);
+				}
+			}
+
 			return loggerConf.CreateLogger();
 		}
 
@@ -77,8 +102,9 @@ namespace KorneiDontsov.Logging {
 		public static Logger CreateSharedConfiguredLogger
 			(IConfiguration conf,
 			 IEnumerable<ILoggingProfileApplier> profileAppliers,
-			 IEnumerable<ILoggingEnrichmentApplier> enrichmentAppliers) {
-			var logger = CreateConfiguredLogger(conf, profileAppliers, enrichmentAppliers);
+			 IEnumerable<ILoggingEnrichmentApplier> enrichmentAppliers,
+			 IEnumerable<ILoggingFilterApplier> filterAppliers) {
+			var logger = CreateConfiguredLogger(conf, profileAppliers, enrichmentAppliers, filterAppliers);
 			Log.Logger = logger;
 			return logger;
 		}

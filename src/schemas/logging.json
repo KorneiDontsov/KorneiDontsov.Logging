@@ -115,6 +115,9 @@
 					"type": "boolean"
 				}
 			}
+		},
+		"filters": {
+			"type": "object"
 		}
 	}
 }
