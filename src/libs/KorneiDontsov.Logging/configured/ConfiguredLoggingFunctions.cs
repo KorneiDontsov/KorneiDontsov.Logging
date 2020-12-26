@@ -1,4 +1,4 @@
-﻿// Copyright (c) Kornei Dontsov. All Rights Reserved. Licensed under the MIT.
+// Copyright (c) Kornei Dontsov. All Rights Reserved. Licensed under the MIT.
 // See LICENSE in the project root for license information.
 
 namespace KorneiDontsov.Logging {
@@ -91,16 +91,12 @@ namespace KorneiDontsov.Logging {
 						.AddTransient<ILoggingProfileApplier, ConsoleProfileApplier>()
 						.AddTransient<ILoggingProfileApplier, LogFileProfileApplier>()
 						.AddTransient<ILoggingEnrichmentApplier, ThreadEnrichmentApplier>()
-						.AddSingleton<Microsoft.Extensions.Logging.ILoggerFactory, ConfiguredLoggerFactory>()
+						.AddSingleton<ConfiguredLoggerFactory>()
+						.AddSingleton<Microsoft.Extensions.Logging.ILoggerFactory?>(
+							serviceProvider => serviceProvider.GetService<ConfiguredLoggerFactory>())
 						.AddSingleton<ILogger?>(
-							provider => {
-								var loggerFactory = provider.GetService<Microsoft.Extensions.Logging.ILoggerFactory>();
-								return (loggerFactory as ConfiguredLoggerFactory)?.logger;
-							})
-						.AddSingleton(
-							provider => {
-								var logger = provider.GetService<ILogger?>();
-								return logger is {} ? new AotLogger(logger) : null;
-							}));
+							provider => provider.GetService<ConfiguredLoggerFactory>()?.logger)
+						.AddSingleton<AotLogger?>(
+							provider => provider.GetService<ILogger?>()?.Aot()));
 	}
 }
