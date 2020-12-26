@@ -81,7 +81,7 @@ namespace KorneiDontsov.Logging {
 			var outputConf = profileConf.GetSection("output");
 			if(! outputConf.Exists())
 				throw new LoggingConfigurationException($"Missed '{profileConf}.output'.");
-			else if(outputConf.GetChildren().ToList() is not ({ Count: > 0 } and var outputArrItems))
+			else if(outputConf.GetChildren().ToList() is not ({ Count: > 0 } and { } outputArrItems))
 				throw new LoggingConfigurationException($"'{profileConf}:output' is not a string array.");
 			else {
 				var sb = new StringBuilder(256);
