@@ -21,10 +21,6 @@ namespace KorneiDontsov.Logging {
 
 		/// <inheritdoc />
 		public void Apply (LoggerSinkConfiguration writeTo, LoggingProfileConfiguration conf) {
-			static Boolean IsFullPath (String path) =>
-				Path.IsPathRooted(path)
-				&& Path.GetPathRoot(path) != Path.DirectorySeparatorChar.ToString();
-
 			var isSync = conf.GetSyncValue();
 			var outputTemplate = conf.GetOutputTemplate();
 
@@ -57,7 +53,7 @@ namespace KorneiDontsov.Logging {
 			}
 			else {
 				var fileFullPath =
-					IsFullPath(filePath)
+					Path.IsPathRooted(filePath)
 						? filePath
 						: Path.Combine(environment.contentRootPath, filePath);
 
