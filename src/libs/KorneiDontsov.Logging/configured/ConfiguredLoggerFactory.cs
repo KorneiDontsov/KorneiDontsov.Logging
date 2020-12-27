@@ -21,13 +21,15 @@ namespace KorneiDontsov.Logging {
 			(IConfiguration configuration,
 			 IEnumerable<ILoggingProfileApplier> profileAppliers,
 			 IEnumerable<ILoggingEnrichmentApplier> enrichmentAppliers,
-			 IEnumerable<ILoggingFilterApplier> filterAppliers) {
+			 IEnumerable<ILoggingFilterApplier> filterAppliers,
+			 OnLoggerConfigurationLoaded? onLoggerConfigurationLoaded = null) {
 			logger =
 				CreateConfiguredLogger(
 					configuration.GetSection("logging"),
 					profileAppliers,
 					enrichmentAppliers,
-					filterAppliers);
+					filterAppliers,
+					onLoggerConfigurationLoaded);
 			(overridenLogger, Log.Logger) = (Log.Logger, logger);
 			provider = new(logger, dispose: false);
 		}

@@ -155,7 +155,8 @@ namespace KorneiDontsov.Logging {
 			(IConfiguration conf,
 			 IEnumerable<ILoggingProfileApplier> profileAppliers,
 			 IEnumerable<ILoggingEnrichmentApplier> enrichmentAppliers,
-			 IEnumerable<ILoggingFilterApplier> filterAppliers) {
+			 IEnumerable<ILoggingFilterApplier> filterAppliers,
+			 OnLoggerConfigurationLoaded? onLoggerConfigurationLoaded = null) {
 			var loggerConf =
 				new LoggerConfiguration()
 					.Destructure.UsingAttributes()
@@ -165,6 +166,7 @@ namespace KorneiDontsov.Logging {
 			ConfigureProfiles(loggerConf, conf, profileAppliers);
 			ConfigureEnrichments(loggerConf, conf, enrichmentAppliers);
 			ConfigureFilters(loggerConf, conf, filterAppliers);
+			onLoggerConfigurationLoaded?.Invoke(loggerConf);
 
 			return loggerConf.CreateLogger();
 		}
@@ -209,5 +211,12 @@ namespace KorneiDontsov.Logging {
 
 		public static IHostBuilder UseConfiguredLogger (this IHostBuilder hostBuilder) =>
 			hostBuilder.ConfigureServices((context, services) => services.AddConfiguredLogger());
+
+		public static IHostBuilder UseConfiguredLogger
+			(this IHostBuilder hostBuilder, OnLoggerConfigurationLoaded onConfigurationLoaded) =>
+			hostBuilder.ConfigureServices(
+				(context, services) =>
+					services.AddConfiguredLogger()
+						.AddSingleton(onConfigurationLoaded));
 	}
 }

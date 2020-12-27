@@ -8,7 +8,8 @@ using Microsoft.Extensions.Hosting;
 
 CrashLogger.Activate();
 Host.CreateDefaultBuilder(args)
-	.UseConfiguredLogger()
+	.UseConfiguredLogger(
+		conf => conf.Enrich.WithProperty("EnrichedByCode", true))
 	.UseGenericLogger()
 	.ConfigureServices(services => services.AddHostedService<ServiceExample>())
 	.Build()
