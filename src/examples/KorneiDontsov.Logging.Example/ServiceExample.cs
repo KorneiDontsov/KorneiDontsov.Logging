@@ -10,10 +10,10 @@ namespace KorneiDontsov.Logging.Example {
 	using System.Threading.Tasks;
 
 	class ServiceExample: IHostedService {
-		ILogger logger { get; }
+		readonly ILogger logger;
 
-		public ServiceExample (ILogger logger) =>
-			this.logger = logger.ForContext<ServiceExample>();
+		public ServiceExample (ILogger<ServiceExample> logger) =>
+			this.logger = logger;
 
 		async void BeginWork () {
 			logger.Information("An error will be thrown after 3 seconds.");

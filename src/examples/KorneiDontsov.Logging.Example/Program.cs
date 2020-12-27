@@ -9,6 +9,7 @@ using Microsoft.Extensions.Hosting;
 CrashLogger.Activate();
 Host.CreateDefaultBuilder(args)
 	.UseConfiguredLogger()
+	.UseGenericLogger()
 	.ConfigureServices(services => services.AddHostedService<ServiceExample>())
 	.Build()
 	.Run();
