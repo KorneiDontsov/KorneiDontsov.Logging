@@ -74,8 +74,8 @@ namespace KorneiDontsov.Logging {
 				}
 			}
 
-			var enrichmentsConf = conf.GetSection("enrichments").GetChildren();
-			foreach(var enrichmentConf in enrichmentsConf) {
+			var enrichmentConfs = conf.GetSection("enrichments").GetChildren();
+			foreach(var enrichmentConf in enrichmentConfs) {
 				var enrichmentName = enrichmentConf.Key.ToLowerInvariant();
 				if(enrichmentAppliersMap.TryGetValue(enrichmentName, out var enrichmentApplier))
 					enrichmentApplier.Apply(loggerConf.Enrich, enrichmentConf);
@@ -85,8 +85,8 @@ namespace KorneiDontsov.Logging {
 				}
 			}
 
-			var filtersConf = conf.GetSection("filters").GetChildren();
-			foreach(var filterConf in filtersConf) {
+			var filterConfs = conf.GetSection("filters").GetChildren();
+			foreach(var filterConf in filterConfs) {
 				var filterName = filterConf.Key.ToLowerInvariant();
 				if(filterAppliersMap.TryGetValue(filterName, out var filterApplier))
 					filterApplier.Apply(loggerConf.Filter, filterConf);
