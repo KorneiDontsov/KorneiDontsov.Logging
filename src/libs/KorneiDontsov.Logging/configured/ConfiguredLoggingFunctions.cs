@@ -5,6 +5,7 @@ namespace KorneiDontsov.Logging {
 	using Destructurama;
 	using Microsoft.Extensions.Configuration;
 	using Microsoft.Extensions.DependencyInjection;
+	using Microsoft.Extensions.DependencyInjection.Extensions;
 	using Microsoft.Extensions.Hosting;
 	using Serilog;
 	using Serilog.Core;
@@ -120,20 +121,24 @@ namespace KorneiDontsov.Logging {
 			return logger;
 		}
 
+		public static IServiceCollection AddConfiguredLoggerCore (this IServiceCollection services) {
+			services.TryAddSingleton<LoggingAppEnvironment>();
+			return services.AddSingleton<ConfiguredLoggerFactory>()
+				.AddSingleton<Microsoft.Extensions.Logging.ILoggerFactory?>(
+					serviceProvider => serviceProvider.GetService<ConfiguredLoggerFactory>())
+				.AddSingleton<ILogger?>(
+					provider => provider.GetService<ConfiguredLoggerFactory>()?.logger)
+				.AddSingleton<AotLogger?>(
+					provider => provider.GetService<ILogger?>()?.Aot());
+		}
+
+		public static IServiceCollection AddConfiguredLogger (this IServiceCollection services) =>
+			services.AddConfiguredLoggerCore()
+				.AddTransient<ILoggingProfileApplier, ConsoleProfileApplier>()
+				.AddTransient<ILoggingProfileApplier, LogFileProfileApplier>()
+				.AddTransient<ILoggingEnrichmentApplier, ThreadEnrichmentApplier>();
+
 		public static IHostBuilder UseConfiguredLogger (this IHostBuilder hostBuilder) =>
-			hostBuilder.ConfigureServices(
-				(context, services) =>
-					services
-						.AddSingleton<LoggingAppEnvironment>()
-						.AddTransient<ILoggingProfileApplier, ConsoleProfileApplier>()
-						.AddTransient<ILoggingProfileApplier, LogFileProfileApplier>()
-						.AddTransient<ILoggingEnrichmentApplier, ThreadEnrichmentApplier>()
-						.AddSingleton<ConfiguredLoggerFactory>()
-						.AddSingleton<Microsoft.Extensions.Logging.ILoggerFactory?>(
-							serviceProvider => serviceProvider.GetService<ConfiguredLoggerFactory>())
-						.AddSingleton<ILogger?>(
-							provider => provider.GetService<ConfiguredLoggerFactory>()?.logger)
-						.AddSingleton<AotLogger?>(
-							provider => provider.GetService<ILogger?>()?.Aot()));
+			hostBuilder.ConfigureServices((context, services) => services.AddConfiguredLogger());
 	}
 }
