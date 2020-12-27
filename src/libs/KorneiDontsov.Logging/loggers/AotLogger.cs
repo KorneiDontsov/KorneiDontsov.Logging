@@ -18,7 +18,7 @@ namespace KorneiDontsov.Logging {
 		readonly ILogger impl;
 
 		// ReSharper disable once InconsistentNaming
-		public ILogger Impl => fastImpl ?? impl;
+		public ILogger Impl => impl;
 
 		public AotLogger (ILogger impl) {
 			fastImpl = impl as Logger;
@@ -36,50 +36,40 @@ namespace KorneiDontsov.Logging {
 
 		/// <inheritdoc cref = "ILogger.ForContext(ILogEventEnricher)" />
 		public AotLogger ForContext (ILogEventEnricher enricher) =>
-			new(fastImpl is { } ? fastImpl.ForContext(enricher) : impl.ForContext(enricher));
+			new(impl.ForContext(enricher));
 
 		/// <inheritdoc cref = "ILogger.ForContext(IEnumerable{ILogEventEnricher})" />
 		public AotLogger ForContext (IEnumerable<ILogEventEnricher> enrichers) =>
-			new(fastImpl is { } ? fastImpl.ForContext(enrichers) : impl.ForContext(enrichers));
+			new(impl.ForContext(enrichers));
 
 		/// <inheritdoc cref = "ILogger.ForContext(string, object, bool)" />
 		public AotLogger ForContext (String propertyName, Object? value, Boolean destructureObjects = false) =>
-			new(
-				fastImpl is { }
-					? fastImpl.ForContext(propertyName, value, destructureObjects)
-					: impl.ForContext(propertyName, value, destructureObjects));
+			new(impl.ForContext(propertyName, value, destructureObjects));
 
 		/// <inheritdoc cref = "ILogger.ForContext{TSource}" />
 		public AotLogger ForContext<TSource> () =>
-			new(fastImpl is { } ? fastImpl.ForContext<TSource>() : impl.ForContext(typeof(TSource)));
+			new(impl.ForContext(typeof(TSource)));
 
 		/// <inheritdoc cref = "ILogger.ForContext(Type)" />
 		public AotLogger ForContext (Type source) =>
-			new(fastImpl is { } ? fastImpl.ForContext(source) : impl.ForContext(source));
+			new(impl.ForContext(source));
 
 		/// <inheritdoc cref = "ILogger.Write(LogEvent)" />
-		public void Write (LogEvent logEvent) {
-			if(fastImpl is { })
-				fastImpl.Write(logEvent);
-			else
-				impl.Write(logEvent);
-		}
+		public void Write (LogEvent logEvent) =>
+			impl.Write(logEvent);
 
 		/// <inheritdoc cref = "ILogger.Write(LogEventLevel, string)" />
 		[MessageTemplateFormatMethod("messageTemplate")]
-		public void Write (LogEventLevel level, String messageTemplate) {
-			if(fastImpl is { })
-				fastImpl.Write(level, messageTemplate);
-			else
-				impl.Write(level, messageTemplate);
-		}
+		public void Write (LogEventLevel level, String messageTemplate) =>
+			impl.Write(level, messageTemplate);
 
 		/// <inheritdoc cref = "ILogger.Write{T}(LogEventLevel, string, T)" />
 		[MessageTemplateFormatMethod("messageTemplate")]
 		public void Write<T> (LogEventLevel level, String messageTemplate, T propertyValue) {
 			if(fastImpl is { })
 				fastImpl.Write(level, messageTemplate, propertyValue);
-			else if(impl.IsEnabled(level)) impl.Write(level, messageTemplate, new Object?[] { propertyValue });
+			else if(impl.IsEnabled(level))
+				impl.Write(level, messageTemplate, new Object?[] { propertyValue });
 		}
 
 		/// <inheritdoc cref = "ILogger.Write{T0, T1}(LogEventLevel, string, T0, T1)" />
@@ -107,21 +97,13 @@ namespace KorneiDontsov.Logging {
 
 		/// <inheritdoc cref = "ILogger.Write(LogEventLevel, string, object[])" />
 		[MessageTemplateFormatMethod("messageTemplate")]
-		public void Write (LogEventLevel level, String messageTemplate, params Object?[] propertyValues) {
-			if(fastImpl is { })
-				fastImpl.Write(level, messageTemplate, propertyValues);
-			else
-				impl.Write(level, messageTemplate, propertyValues);
-		}
+		public void Write (LogEventLevel level, String messageTemplate, params Object?[] propertyValues) =>
+			impl.Write(level, messageTemplate, propertyValues);
 
 		/// <inheritdoc cref = "ILogger.Write(LogEventLevel, Exception, string)" />
 		[MessageTemplateFormatMethod("messageTemplate")]
-		public void Write (LogEventLevel level, Exception exception, String messageTemplate) {
-			if(fastImpl is { })
-				fastImpl.Write(level, exception, messageTemplate);
-			else
-				impl.Write(level, exception, messageTemplate);
-		}
+		public void Write (LogEventLevel level, Exception exception, String messageTemplate) =>
+			impl.Write(level, exception, messageTemplate);
 
 		/// <inheritdoc cref = "ILogger.Write{T}(LogEventLevel, Exception, string, T)" />
 		[MessageTemplateFormatMethod("messageTemplate")]
@@ -171,25 +153,17 @@ namespace KorneiDontsov.Logging {
 			(LogEventLevel level,
 			 Exception exception,
 			 String messageTemplate,
-			 params Object?[] propertyValues) {
-			if(fastImpl is { })
-				fastImpl.Write(level, exception, messageTemplate, propertyValues);
-			else
-				impl.Write(level, exception, messageTemplate, propertyValues);
-		}
+			 params Object?[] propertyValues) =>
+			impl.Write(level, exception, messageTemplate, propertyValues);
 
 		/// <inheritdoc cref = "ILogger.IsEnabled(LogEventLevel)" />
 		public Boolean IsEnabled (LogEventLevel level) =>
-			fastImpl?.IsEnabled(level) ?? impl.IsEnabled(level);
+			impl.IsEnabled(level);
 
 		/// <inheritdoc cref = "ILogger.Verbose(string)" />
 		[MessageTemplateFormatMethod("messageTemplate")]
-		public void Verbose (String messageTemplate) {
-			if(fastImpl is { })
-				fastImpl.Verbose(messageTemplate);
-			else
-				impl.Verbose(messageTemplate);
-		}
+		public void Verbose (String messageTemplate) =>
+			impl.Verbose(messageTemplate);
 
 		/// <inheritdoc cref = "ILogger.Verbose{T}(string, T)" />
 		[MessageTemplateFormatMethod("messageTemplate")]
@@ -224,21 +198,13 @@ namespace KorneiDontsov.Logging {
 
 		/// <inheritdoc cref = "ILogger.Verbose(string, object[])" />
 		[MessageTemplateFormatMethod("messageTemplate")]
-		public void Verbose (String messageTemplate, params Object?[] propertyValues) {
-			if(fastImpl is { })
-				fastImpl.Verbose(messageTemplate, propertyValues);
-			else
-				impl.Verbose(messageTemplate, propertyValues);
-		}
+		public void Verbose (String messageTemplate, params Object?[] propertyValues) =>
+			impl.Verbose(messageTemplate, propertyValues);
 
 		/// <inheritdoc cref = "ILogger.Verbose(Exception, string)" />
 		[MessageTemplateFormatMethod("messageTemplate")]
-		public void Verbose (Exception exception, String messageTemplate) {
-			if(fastImpl is { })
-				fastImpl.Verbose(exception, messageTemplate);
-			else
-				impl.Verbose(exception, messageTemplate);
-		}
+		public void Verbose (Exception exception, String messageTemplate) =>
+			impl.Verbose(exception, messageTemplate);
 
 		/// <inheritdoc cref = "ILogger.Verbose{T}(Exception, string, T)" />
 		[MessageTemplateFormatMethod("messageTemplate")]
@@ -281,31 +247,21 @@ namespace KorneiDontsov.Logging {
 
 		/// <inheritdoc cref = "ILogger.Verbose(Exception, string, object[])" />
 		[MessageTemplateFormatMethod("messageTemplate")]
-		public void Verbose
-			(Exception exception,
-			 String messageTemplate,
-			 params Object?[] propertyValues) {
-			if(fastImpl is { })
-				fastImpl.Verbose(exception, messageTemplate, propertyValues);
-			else
-				impl.Verbose(exception, messageTemplate, propertyValues);
-		}
+		public void Verbose (Exception exception, String messageTemplate, params Object?[] propertyValues) =>
+			impl.Verbose(exception, messageTemplate, propertyValues);
 
 		/// <inheritdoc cref = "ILogger.Debug(string)" />
 		[MessageTemplateFormatMethod("messageTemplate")]
-		public void Debug (String messageTemplate) {
-			if(fastImpl is { })
-				fastImpl.Debug(messageTemplate);
-			else
-				impl.Debug(messageTemplate);
-		}
+		public void Debug (String messageTemplate) =>
+			impl.Debug(messageTemplate);
 
 		/// <inheritdoc cref = "ILogger.Debug{T}(string, T)" />
 		[MessageTemplateFormatMethod("messageTemplate")]
 		public void Debug<T> (String messageTemplate, T propertyValue) {
 			if(fastImpl is { })
 				fastImpl.Debug(messageTemplate, propertyValue);
-			else if(impl.IsEnabled(LogEventLevel.Debug)) impl.Debug(messageTemplate, new Object?[] { propertyValue });
+			else if(impl.IsEnabled(LogEventLevel.Debug))
+				impl.Debug(messageTemplate, new Object?[] { propertyValue });
 		}
 
 		/// <inheritdoc cref = "ILogger.Debug{T0, T1}(string, T0, T1)" />
@@ -332,21 +288,13 @@ namespace KorneiDontsov.Logging {
 
 		/// <inheritdoc cref = "ILogger.Debug(string, object[])" />
 		[MessageTemplateFormatMethod("messageTemplate")]
-		public void Debug (String messageTemplate, params Object?[] propertyValues) {
-			if(fastImpl is { })
-				fastImpl.Debug(messageTemplate, propertyValues);
-			else
-				impl.Debug(messageTemplate, propertyValues);
-		}
+		public void Debug (String messageTemplate, params Object?[] propertyValues) =>
+			impl.Debug(messageTemplate, propertyValues);
 
 		/// <inheritdoc cref = "ILogger.Debug(Exception, string)" />
 		[MessageTemplateFormatMethod("messageTemplate")]
-		public void Debug (Exception exception, String messageTemplate) {
-			if(fastImpl is { })
-				fastImpl.Debug(exception, messageTemplate);
-			else
-				impl.Debug(exception, messageTemplate);
-		}
+		public void Debug (Exception exception, String messageTemplate) =>
+			impl.Debug(exception, messageTemplate);
 
 		/// <inheritdoc cref = "ILogger.Debug{T}(Exception, string, T)" />
 		[MessageTemplateFormatMethod("messageTemplate")]
@@ -389,24 +337,13 @@ namespace KorneiDontsov.Logging {
 
 		/// <inheritdoc cref = "ILogger.Debug(Exception, string, object[])" />
 		[MessageTemplateFormatMethod("messageTemplate")]
-		public void Debug
-			(Exception exception,
-			 String messageTemplate,
-			 params Object?[] propertyValues) {
-			if(fastImpl is { })
-				fastImpl.Debug(exception, messageTemplate, propertyValues);
-			else
-				impl.Debug(exception, messageTemplate, propertyValues);
-		}
+		public void Debug (Exception exception, String messageTemplate, params Object?[] propertyValues) =>
+			impl.Debug(exception, messageTemplate, propertyValues);
 
 		/// <inheritdoc cref = "ILogger.Information(string)" />
 		[MessageTemplateFormatMethod("messageTemplate")]
-		public void Information (String messageTemplate) {
-			if(fastImpl is { })
-				fastImpl.Information(messageTemplate);
-			else
-				impl.Information(messageTemplate);
-		}
+		public void Information (String messageTemplate) =>
+			impl.Information(messageTemplate);
 
 		/// <inheritdoc cref = "ILogger.Information{T}(string, T)" />
 		[MessageTemplateFormatMethod("messageTemplate")]
@@ -441,21 +378,13 @@ namespace KorneiDontsov.Logging {
 
 		/// <inheritdoc cref = "ILogger.Information(string, object[])" />
 		[MessageTemplateFormatMethod("messageTemplate")]
-		public void Information (String messageTemplate, params Object?[] propertyValues) {
-			if(fastImpl is { })
-				fastImpl.Information(messageTemplate, propertyValues);
-			else
-				impl.Information(messageTemplate, propertyValues);
-		}
+		public void Information (String messageTemplate, params Object?[] propertyValues) =>
+			impl.Information(messageTemplate, propertyValues);
 
 		/// <inheritdoc cref = "ILogger.Information(Exception, string)" />
 		[MessageTemplateFormatMethod("messageTemplate")]
-		public void Information (Exception exception, String messageTemplate) {
-			if(fastImpl is { })
-				fastImpl.Information(exception, messageTemplate);
-			else
-				impl.Information(exception, messageTemplate);
-		}
+		public void Information (Exception exception, String messageTemplate) =>
+			impl.Information(exception, messageTemplate);
 
 		/// <inheritdoc cref = "ILogger.Information{T}(Exception, string, T)" />
 		[MessageTemplateFormatMethod("messageTemplate")]
@@ -498,24 +427,13 @@ namespace KorneiDontsov.Logging {
 
 		/// <inheritdoc cref = "ILogger.Information(Exception, string, object[])" />
 		[MessageTemplateFormatMethod("messageTemplate")]
-		public void Information
-			(Exception exception,
-			 String messageTemplate,
-			 params Object?[] propertyValues) {
-			if(fastImpl is { })
-				fastImpl.Information(exception, messageTemplate, propertyValues);
-			else
-				impl.Information(exception, messageTemplate, propertyValues);
-		}
+		public void Information (Exception exception, String messageTemplate, params Object?[] propertyValues) =>
+			impl.Information(exception, messageTemplate, propertyValues);
 
 		/// <inheritdoc cref = "ILogger.Warning(string)" />
 		[MessageTemplateFormatMethod("messageTemplate")]
-		public void Warning (String messageTemplate) {
-			if(fastImpl is { })
-				fastImpl.Warning(messageTemplate);
-			else
-				impl.Warning(messageTemplate);
-		}
+		public void Warning (String messageTemplate) =>
+			impl.Warning(messageTemplate);
 
 		/// <inheritdoc cref = "ILogger.Warning{T}(string, T)" />
 		[MessageTemplateFormatMethod("messageTemplate")]
@@ -550,21 +468,13 @@ namespace KorneiDontsov.Logging {
 
 		/// <inheritdoc cref = "ILogger.Warning(string, object[])" />
 		[MessageTemplateFormatMethod("messageTemplate")]
-		public void Warning (String messageTemplate, params Object?[] propertyValues) {
-			if(fastImpl is { })
-				fastImpl.Warning(messageTemplate, propertyValues);
-			else
-				impl.Warning(messageTemplate, propertyValues);
-		}
+		public void Warning (String messageTemplate, params Object?[] propertyValues) =>
+			impl.Warning(messageTemplate, propertyValues);
 
 		/// <inheritdoc cref = "ILogger.Warning(Exception, string)" />
 		[MessageTemplateFormatMethod("messageTemplate")]
-		public void Warning (Exception exception, String messageTemplate) {
-			if(fastImpl is { })
-				fastImpl.Warning(exception, messageTemplate);
-			else
-				impl.Warning(exception, messageTemplate);
-		}
+		public void Warning (Exception exception, String messageTemplate) =>
+			impl.Warning(exception, messageTemplate);
 
 		/// <inheritdoc cref = "ILogger.Warning{T}(Exception, string, T)" />
 		[MessageTemplateFormatMethod("messageTemplate")]
@@ -607,24 +517,13 @@ namespace KorneiDontsov.Logging {
 
 		/// <inheritdoc cref = "ILogger.Warning(Exception, string, object[])" />
 		[MessageTemplateFormatMethod("messageTemplate")]
-		public void Warning
-			(Exception exception,
-			 String messageTemplate,
-			 params Object?[] propertyValues) {
-			if(fastImpl is { })
-				fastImpl.Warning(exception, messageTemplate, propertyValues);
-			else
-				impl.Warning(exception, messageTemplate, propertyValues);
-		}
+		public void Warning (Exception exception, String messageTemplate, params Object?[] propertyValues) =>
+			impl.Warning(exception, messageTemplate, propertyValues);
 
 		/// <inheritdoc cref = "ILogger.Error(string)" />
 		[MessageTemplateFormatMethod("messageTemplate")]
-		public void Error (String messageTemplate) {
-			if(fastImpl is { })
-				fastImpl.Error(messageTemplate);
-			else
-				impl.Error(messageTemplate);
-		}
+		public void Error (String messageTemplate) =>
+			impl.Error(messageTemplate);
 
 		/// <inheritdoc cref = "ILogger.Error{T}(string, T)" />
 		[MessageTemplateFormatMethod("messageTemplate")]
@@ -658,21 +557,13 @@ namespace KorneiDontsov.Logging {
 
 		/// <inheritdoc cref = "ILogger.Error(string, object[])" />
 		[MessageTemplateFormatMethod("messageTemplate")]
-		public void Error (String messageTemplate, params Object?[] propertyValues) {
-			if(fastImpl is { })
-				fastImpl.Error(messageTemplate, propertyValues);
-			else
-				impl.Error(messageTemplate, propertyValues);
-		}
+		public void Error (String messageTemplate, params Object?[] propertyValues) =>
+			impl.Error(messageTemplate, propertyValues);
 
 		/// <inheritdoc cref = "ILogger.Error(Exception, string)" />
 		[MessageTemplateFormatMethod("messageTemplate")]
-		public void Error (Exception exception, String messageTemplate) {
-			if(fastImpl is { })
-				fastImpl.Error(exception, messageTemplate);
-			else
-				impl.Error(exception, messageTemplate);
-		}
+		public void Error (Exception exception, String messageTemplate) =>
+			impl.Error(exception, messageTemplate);
 
 		/// <inheritdoc cref = "ILogger.Error{T}(Exception, string, T)" />
 		[MessageTemplateFormatMethod("messageTemplate")]
@@ -715,31 +606,21 @@ namespace KorneiDontsov.Logging {
 
 		/// <inheritdoc cref = "ILogger.Error(Exception, string, object[])" />
 		[MessageTemplateFormatMethod("messageTemplate")]
-		public void Error
-			(Exception exception,
-			 String messageTemplate,
-			 params Object?[] propertyValues) {
-			if(fastImpl is { })
-				fastImpl.Error(exception, messageTemplate, propertyValues);
-			else
-				impl.Error(exception, messageTemplate, propertyValues);
-		}
+		public void Error (Exception exception, String messageTemplate, params Object?[] propertyValues) =>
+			impl.Error(exception, messageTemplate, propertyValues);
 
 		/// <inheritdoc cref = "ILogger.Fatal(string)" />
 		[MessageTemplateFormatMethod("messageTemplate")]
-		public void Fatal (String messageTemplate) {
-			if(fastImpl is { })
-				fastImpl.Fatal(messageTemplate);
-			else
-				impl.Fatal(messageTemplate);
-		}
+		public void Fatal (String messageTemplate) =>
+			impl.Fatal(messageTemplate);
 
 		/// <inheritdoc cref = "ILogger.Fatal{T}(string, T)" />
 		[MessageTemplateFormatMethod("messageTemplate")]
 		public void Fatal<T> (String messageTemplate, T propertyValue) {
 			if(fastImpl is { })
 				fastImpl.Fatal(messageTemplate, propertyValue);
-			else if(impl.IsEnabled(LogEventLevel.Fatal)) impl.Fatal(messageTemplate, new Object?[] { propertyValue });
+			else if(impl.IsEnabled(LogEventLevel.Fatal))
+				impl.Fatal(messageTemplate, new Object?[] { propertyValue });
 		}
 
 		/// <inheritdoc cref = "ILogger.Fatal{T0, T1}(string, T0, T1)" />
@@ -766,21 +647,13 @@ namespace KorneiDontsov.Logging {
 
 		/// <inheritdoc cref = "ILogger.Fatal(string, object[])" />
 		[MessageTemplateFormatMethod("messageTemplate")]
-		public void Fatal (String messageTemplate, params Object?[] propertyValues) {
-			if(fastImpl is { })
-				fastImpl.Fatal(messageTemplate, propertyValues);
-			else
-				impl.Fatal(messageTemplate, propertyValues);
-		}
+		public void Fatal (String messageTemplate, params Object?[] propertyValues) =>
+			impl.Fatal(messageTemplate, propertyValues);
 
 		/// <inheritdoc cref = "ILogger.Fatal(Exception, string)" />
 		[MessageTemplateFormatMethod("messageTemplate")]
-		public void Fatal (Exception exception, String messageTemplate) {
-			if(fastImpl is { })
-				fastImpl.Fatal(exception, messageTemplate);
-			else
-				impl.Fatal(exception, messageTemplate);
-		}
+		public void Fatal (Exception exception, String messageTemplate) =>
+			impl.Fatal(exception, messageTemplate);
 
 		/// <inheritdoc cref = "ILogger.Fatal{T}(Exception, string, T)" />
 		[MessageTemplateFormatMethod("messageTemplate")]
@@ -823,15 +696,8 @@ namespace KorneiDontsov.Logging {
 
 		/// <inheritdoc cref = "ILogger.Fatal(Exception, string, object[])" />
 		[MessageTemplateFormatMethod("messageTemplate")]
-		public void Fatal
-			(Exception exception,
-			 String messageTemplate,
-			 params Object?[] propertyValues) {
-			if(fastImpl is { })
-				fastImpl.Fatal(exception, messageTemplate, propertyValues);
-			else
-				impl.Fatal(exception, messageTemplate, propertyValues);
-		}
+		public void Fatal (Exception exception, String messageTemplate, params Object?[] propertyValues) =>
+			impl.Fatal(exception, messageTemplate, propertyValues);
 
 		/// <inheritdoc cref = "ILogger.BindMessageTemplate" />
 		[MessageTemplateFormatMethod("messageTemplate")]
@@ -840,17 +706,11 @@ namespace KorneiDontsov.Logging {
 			 Object[] propertyValues,
 			 out MessageTemplate parsedTemplate,
 			 out IEnumerable<LogEventProperty> boundProperties) =>
-			fastImpl is { }
-				? fastImpl.BindMessageTemplate(
-					messageTemplate,
-					propertyValues,
-					out parsedTemplate,
-					out boundProperties)
-				: impl.BindMessageTemplate(
-					messageTemplate,
-					propertyValues,
-					out parsedTemplate,
-					out boundProperties);
+			impl.BindMessageTemplate(
+				messageTemplate,
+				propertyValues,
+				out parsedTemplate,
+				out boundProperties);
 
 		/// <inheritdoc cref = "ILogger.BindProperty" />
 		public Boolean BindProperty
@@ -858,8 +718,6 @@ namespace KorneiDontsov.Logging {
 			 Object value,
 			 Boolean destructureObjects,
 			 out LogEventProperty property) =>
-			fastImpl is { }
-				? fastImpl.BindProperty(propertyName, value, destructureObjects, out property)
-				: impl.BindProperty(propertyName, value, destructureObjects, out property);
+			impl.BindProperty(propertyName, value, destructureObjects, out property);
 	}
 }
