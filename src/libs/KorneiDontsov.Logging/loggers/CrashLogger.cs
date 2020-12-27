@@ -73,7 +73,7 @@ namespace KorneiDontsov.Logging {
 						CrashLogWriteCondition.IfGlobalLoggerMissed => missedGlobalLogger,
 						CrashLogWriteCondition.Never => false
 					};
-				if(! writeToConsole && ! writeToFile)
+				if(! (writeToConsole & writeToFile))
 					return null;
 				else {
 					const String outputTemplate =
