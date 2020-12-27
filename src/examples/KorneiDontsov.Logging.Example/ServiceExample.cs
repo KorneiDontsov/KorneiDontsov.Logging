@@ -16,7 +16,7 @@ namespace KorneiDontsov.Logging.Example {
 			this.logger = logger;
 
 		async void BeginWork () {
-			logger.Information("An error will be thrown after 3 seconds.");
+			logger.Debug("An error will be thrown after 3 seconds.");
 			await Task.Delay(1_500);
 			try {
 				throw new("Exception example.");
@@ -32,8 +32,9 @@ namespace KorneiDontsov.Logging.Example {
 
 		/// <inheritdoc />
 		public async Task StartAsync (CancellationToken cancellationToken) {
-			logger.Information("Application will start after 2 seconds.");
+			logger.Debug("Service will start after 2 seconds.");
 			await Task.Delay(1_500, cancellationToken);
+			logger.Information("Service started.");
 			BeginWork();
 		}
 

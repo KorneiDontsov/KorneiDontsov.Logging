@@ -9,12 +9,31 @@ namespace KorneiDontsov.Logging {
 	using Microsoft.Extensions.Hosting;
 	using Serilog;
 	using Serilog.Core;
+	using Serilog.Events;
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
 	using System.Runtime.CompilerServices;
 
 	public static class ConfiguredLoggingFunctions {
+		static void ConfigureMinLevels (LoggerConfiguration loggerConf, IConfiguration conf) {
+			[MethodImpl(MethodImplOptions.NoInlining)]
+			static LoggingConfigurationException SourceIsNotSpecified (IConfigurationSection overrideConf) =>
+				new($"'{overrideConf.Path}' -- source to be overriden is not specified.");
+
+			var minLevelsConf = conf.GetSection("minLevels");
+			var minLevel = minLevelsConf.ReadEnum<LogEventLevel>("default", defaultValue: LogEventLevel.Information);
+			loggerConf.MinimumLevel.Is(minLevel);
+
+			foreach(var overrideConf in minLevelsConf.GetSection("overrides").GetChildren()) {
+				var source = overrideConf.Key;
+				if(String.IsNullOrWhiteSpace(source)) throw SourceIsNotSpecified(overrideConf);
+
+				var sourceMinLevel = overrideConf.ReadEnum<LogEventLevel>();
+				loggerConf.MinimumLevel.Override(source, sourceMinLevel);
+			}
+		}
+
 		static void ConfigureProfiles
 			(LoggerConfiguration loggerConf,
 			 IConfiguration conf,
@@ -142,6 +161,7 @@ namespace KorneiDontsov.Logging {
 					.Destructure.UsingAttributes()
 					.Enrich.FromLogContext();
 
+			ConfigureMinLevels(loggerConf, conf);
 			ConfigureProfiles(loggerConf, conf, profileAppliers);
 			ConfigureEnrichments(loggerConf, conf, enrichmentAppliers);
 			ConfigureFilters(loggerConf, conf, filterAppliers);

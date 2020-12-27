@@ -1,6 +1,17 @@
 ﻿{
-	"$schema": "http://json-schema.org/draft-07/schema#",
+	"$schema": "http://json-schema.org/draft-07/schema",
 	"definitions": {
+		"level": {
+			"type": "string",
+			"enum": [
+				"verbose",
+				"debug",
+				"information",
+				"warning",
+				"error",
+				"fatal"
+			]
+		},
 		"sync": {
 			"description": "Indicates how events are logged: synchronously or asynchronously. Default value is false.",
 			"type": "boolean",
@@ -18,6 +29,23 @@
 	},
 	"type": "object",
 	"properties": {
+		"minLevels": {
+			"type": "object",
+			"properties": {
+				"default": {
+					"$ref": "#/definitions/level",
+					"default": "information"
+				},
+				"overrides": {
+					"type": "object",
+					"patternProperties": {
+						".": {
+							"$ref": "#/definitions/level"
+						}
+					}
+				}
+			}
+		},
 		"profiles": {
 			"type": "object",
 			"patternProperties": {
@@ -25,15 +53,7 @@
 					"type": "object",
 					"properties": {
 						"minLevel": {
-							"type": "string",
-							"enum": [
-								"verbose",
-								"debug",
-								"information",
-								"warning",
-								"error",
-								"fatal"
-							]
+							"$ref": "#/definitions/level"
 						},
 						"type": {
 							"type": "string",

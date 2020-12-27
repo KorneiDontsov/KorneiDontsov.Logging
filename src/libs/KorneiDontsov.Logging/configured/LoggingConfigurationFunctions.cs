@@ -16,6 +16,10 @@ namespace KorneiDontsov.Logging {
 			new($"Missed '{conf.Path}:{propName}'.");
 
 		[MethodImpl(MethodImplOptions.NoInlining)]
+		static LoggingConfigurationException NotValid (IConfigurationSection conf, String value) =>
+			new($"'{conf.Path}' has invalid value '{value}'.");
+
+		[MethodImpl(MethodImplOptions.NoInlining)]
 		static LoggingConfigurationException NotValid (IConfigurationSection conf, String propName, String value) =>
 			new($"'{conf.Path}':{propName} has invalid value '{value}'.");
 
@@ -117,6 +121,15 @@ namespace KorneiDontsov.Logging {
 				};
 			}
 		}
+
+		/// <exception cref = "LoggingConfigurationException" />
+		public static T ReadEnum<T> (this IConfigurationSection conf, T? defaultValue = null)
+			where T: struct, Enum =>
+			conf.Value switch {
+				{ } value when Enum.TryParse(value, ignoreCase: true, out T parsedValue) => parsedValue,
+				null => defaultValue ?? throw NotFound(conf),
+				{ } value => throw NotValid(conf, value)
+			};
 
 		/// <exception cref = "LoggingConfigurationException" />
 		public static T ReadEnum<T> (this IConfigurationSection conf, String propName, T? defaultValue = null)
