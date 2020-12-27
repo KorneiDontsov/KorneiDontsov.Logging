@@ -21,13 +21,11 @@ namespace KorneiDontsov.Logging {
 
 			protected override Int32 ResetCharCount => 0;
 
-			/// <inheritdoc />
 			public override Int32 Set (TextWriter output, ConsoleThemeStyle style) {
 				Console.ForegroundColor = ConsoleColor.DarkRed;
 				return 0;
 			}
 
-			/// <inheritdoc />
 			public override void Reset (TextWriter output) =>
 				Console.ResetColor();
 		}
@@ -185,7 +183,7 @@ namespace KorneiDontsov.Logging {
 		public static void Activate (String crashLogRootPath) {
 			ValidatePath(crashLogRootPath, nameof(crashLogRootPath));
 			Worker.options =
-				new CrashLoggerOptions {
+				new() {
 					writeToConsole = CrashLogWriteCondition.IfGlobalLoggerMissed,
 					writeToFile = CrashLogWriteCondition.Always,
 					crashLogRootPath = crashLogRootPath

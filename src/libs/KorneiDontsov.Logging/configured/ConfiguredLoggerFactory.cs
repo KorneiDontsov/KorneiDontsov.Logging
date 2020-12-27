@@ -29,7 +29,7 @@ namespace KorneiDontsov.Logging {
 					enrichmentAppliers,
 					filterAppliers);
 			(overridenLogger, Log.Logger) = (Log.Logger, logger);
-			provider = new SerilogLoggerProvider(logger, dispose: false);
+			provider = new(logger, dispose: false);
 		}
 
 		void IDisposable.Dispose () {

@@ -8,8 +8,7 @@ namespace KorneiDontsov.Logging {
 
 	public sealed class ConsoleProfileApplier: ILoggingProfileApplier {
 		/// <inheritdoc />
-		public String profileTypeName =>
-			"console";
+		public String profileTypeName => "console";
 
 		/// <inheritdoc />
 		public void Apply (LoggerSinkConfiguration writeTo, LoggingProfileConfiguration conf) {

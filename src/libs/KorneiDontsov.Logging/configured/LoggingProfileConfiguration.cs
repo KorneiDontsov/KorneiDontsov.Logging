@@ -18,7 +18,7 @@ namespace KorneiDontsov.Logging {
 		/// <exception cref = "LoggingConfigurationException" />
 		public LoggingProfileConfiguration (IConfigurationSection profileConf) {
 			this.profileConf = profileConf;
-			minLevel = profileConf.ReadEnum<LogEventLevel>("minLevel") ?? LogEventLevel.Verbose;
+			minLevel = profileConf.ReadEnum<LogEventLevel>("minLevel", defaultValue: LogEventLevel.Verbose);
 			profileTypeName = profileConf.ReadString("type").ToLowerInvariant();
 		}
 
@@ -55,7 +55,7 @@ namespace KorneiDontsov.Logging {
 			profileConf.GetReloadToken();
 
 		public Boolean GetSyncValue () =>
-			profileConf.ReadBoolean("sync");
+			profileConf.ReadBoolean("sync", defaultValue: false);
 
 		public String GetOutputTemplate () {
 			if(profileConf.GetSection("output").GetChildren().ToList() is not { Count: > 0 } outputArrItems)

@@ -19,14 +19,14 @@ namespace KorneiDontsov.Logging.Example {
 			logger.Information("An error will be thrown after 3 seconds.");
 			await Task.Delay(1_500);
 			try {
-				throw new Exception("Exception example.");
+				throw new("Exception example.");
 			}
 			catch(Exception ex) {
 				using(LogContext.PushProperty("HasLogContext", true))
 					logger.Error(ex, "Exception example was thrown.");
 			}
 			finally {
-				throw new Exception("Crash example.");
+				throw new("Crash example.");
 			}
 		}
 

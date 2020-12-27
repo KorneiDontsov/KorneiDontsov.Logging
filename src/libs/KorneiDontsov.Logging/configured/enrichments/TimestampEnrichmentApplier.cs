@@ -9,8 +9,7 @@ namespace KorneiDontsov.Logging {
 	[Obsolete("Not supported. It cannot work since 'Timestamp' cannot be overriden.")]
 	public sealed class TimestampEnrichmentApplier: ILoggingEnrichmentApplier {
 		/// <inheritdoc />
-		public String enrichmentName =>
-			"timestamp";
+		public String enrichmentName => "timestamp";
 
 		/// <inheritdoc />
 		public void Apply (LoggerEnrichmentConfiguration enrich, IConfigurationSection conf) { }
