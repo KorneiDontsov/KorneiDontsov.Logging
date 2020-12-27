@@ -5,92 +5,202 @@ namespace KorneiDontsov.Logging {
 	using Serilog;
 	using Serilog.Core;
 	using Serilog.Events;
+	using Serilog.Sinks.SystemConsole.Themes;
 	using System;
+	using System.Globalization;
 	using System.IO;
-	using System.Reflection;
+	using System.Runtime.CompilerServices;
 	using System.Threading.Tasks;
-	using static System.String;
 	using static System.Threading.Interlocked;
 
 	public static class CrashLogger {
-		static volatile String criticalLogRootPath = "logs/critical";
+		sealed class CrashLogConsoleTheme: ConsoleTheme {
+			public static CrashLogConsoleTheme shared { get; } = new();
 
-		static volatile Object? previousRaiseTimestamp;
+			public override Boolean CanBuffer => false;
 
-		static void OnCrash (Exception exception, String logTypeName) {
-			var raiseTimestamp = DateTimeOffset.Now;
-			var previousRaiseTimestamp = Exchange(ref CrashLogger.previousRaiseTimestamp, raiseTimestamp);
-
-			var sharedLogger = Log.Logger;
-			Logger? criticalCrashLogger;
-			ILogger logger;
-			if(sharedLogger.IsEnabled(LogEventLevel.Fatal)) {
-				criticalCrashLogger = null;
-				logger = sharedLogger;
-			}
-			else {
-				var appName = Assembly.GetEntryAssembly().GetName().Name;
-				var logFileName = $"{logTypeName}_{appName}_{raiseTimestamp.UtcDateTime:yyyy-MM-ddThhmmss.fff}.log";
-				var logFilePath = Path.Combine(criticalLogRootPath, logFileName);
-				logger = criticalCrashLogger =
-					new LoggerConfiguration()
-						.WriteTo.File(logFilePath)
-						.CreateLogger();
-			}
-
-			try {
-				var log = "Unhandled exception raised at {RaiseTimestamp}.";
-				logger.Fatal(exception, log, new Object?[] { raiseTimestamp });
-
-				if(criticalCrashLogger is {} && previousRaiseTimestamp is {}) {
-					var prevRaiseLog = "Previous raise was at {PreviousRaiseTimestamp}.";
-					criticalCrashLogger.Information(prevRaiseLog, previousRaiseTimestamp);
-				}
-			}
-			finally {
-				Log.CloseAndFlush();
-				(sharedLogger as IDisposable)?.Dispose();
-				criticalCrashLogger?.Dispose();
-			}
-		}
-
-		class NonNativeException: Exception {
-			Object exceptionObject { get; }
-
-			public NonNativeException (Object exceptionObject) =>
-				this.exceptionObject = exceptionObject;
+			protected override Int32 ResetCharCount => 0;
 
 			/// <inheritdoc />
-			public override String Message => exceptionObject.ToString();
-		}
-
-		static CrashLogger () {
-			AppDomain.CurrentDomain.UnhandledException +=
-				(sender, args) =>
-					OnCrash(
-						args.ExceptionObject switch {
-							Exception exception => exception,
-							var exceptionObject => new NonNativeException(exceptionObject)
-						},
-						"UnhandledException");
-			TaskScheduler.UnobservedTaskException +=
-				(sender, args) => OnCrash(args.Exception, "UnobservedTaskException");
-		}
-
-		public static void Activate () { }
-
-		public static void Activate (String criticalLogRootPath) {
-			if(IsNullOrEmpty(criticalLogRootPath))
-				throw new ArgumentException("Critical log root path is null or empty.", nameof(criticalLogRootPath));
-			else if(criticalLogRootPath.IndexOfAny(Path.GetInvalidPathChars()) is var invalidCharIndex
-			        && invalidCharIndex >= 0) {
-				var msg =
-					$"Critical log root path '{criticalLogRootPath}' contains invalid character "
-					+ $"'{criticalLogRootPath[invalidCharIndex]}' at {invalidCharIndex}.";
-				throw new ArgumentException(msg, nameof(criticalLogRootPath));
+			public override Int32 Set (TextWriter output, ConsoleThemeStyle style) {
+				Console.ForegroundColor = ConsoleColor.DarkRed;
+				return 0;
 			}
-			else
-				CrashLogger.criticalLogRootPath = criticalLogRootPath;
+
+			/// <inheritdoc />
+			public override void Reset (TextWriter output) =>
+				Console.ResetColor();
+		}
+
+		static class Worker {
+			static readonly AppDomain appDomain;
+
+			public static CrashLoggerOptions options;
+
+			static String? logFileNameTemplate;
+
+			static Object? previousRaiseTimestamp;
+
+			static String EncodeToUseInPath (String name) {
+				var invalidChars = Path.GetInvalidPathChars();
+				Array.Resize(ref invalidChars, invalidChars.Length + 2);
+				invalidChars[invalidChars.Length - 2] = Path.PathSeparator;
+				invalidChars[invalidChars.Length - 1] = Path.AltDirectorySeparatorChar;
+
+				var encodedName = name.ToCharArray().AsSpan();
+				foreach(ref var currentChar in encodedName)
+					foreach(var invalidChar in invalidChars)
+						if(currentChar == invalidChar) {
+							currentChar = '-';
+							break;
+						}
+
+				return encodedName.ToString();
+			}
+
+			static Logger? CreateCrashLoggerIfRequired
+				(String logName, in DateTimeOffset raisedAt, Boolean missedGlobalLogger) {
+				var options = Worker.options;
+				var writeToConsole =
+					options.writeToConsole switch {
+						CrashLogWriteCondition.Always => true,
+						CrashLogWriteCondition.IfGlobalLoggerMissed => missedGlobalLogger,
+						CrashLogWriteCondition.Never => false
+					};
+				var writeToFile =
+					options.writeToFile switch {
+						CrashLogWriteCondition.Always => true,
+						CrashLogWriteCondition.IfGlobalLoggerMissed => missedGlobalLogger,
+						CrashLogWriteCondition.Never => false
+					};
+				if(! writeToConsole && ! writeToFile)
+					return null;
+				else {
+					const String outputTemplate =
+						"[[CRASH]] {Message:lj}{NewLine}"
+						+ "{Exception}{NewLine}";
+
+					var loggerConf = new LoggerConfiguration();
+
+					if(writeToConsole)
+						loggerConf.WriteTo.Console(
+							outputTemplate: outputTemplate,
+							theme: CrashLogConsoleTheme.shared);
+
+					if(writeToFile) {
+						logFileNameTemplate ??= EncodeToUseInPath(appDomain.FriendlyName) + "_{0}_{1}.log";
+						var fileName =
+							String.Format(
+								CultureInfo.InvariantCulture,
+								logFileNameTemplate,
+								logName,
+								raisedAt.UtcDateTime.ToString("yyyy-MM-ddThhmmss.fff"));
+						loggerConf.WriteTo.File(
+							Path.Combine(options.crashLogRootPath!, fileName),
+							outputTemplate: outputTemplate);
+					}
+
+					return loggerConf.CreateLogger();
+				}
+			}
+
+			static void OnCrash (String logName, Exception exception) {
+				var raiseTimestamp = DateTimeOffset.Now;
+				var raiseTimestampObj = (Object) raiseTimestamp;
+				var previousRaiseTimestampObj = Exchange(ref previousRaiseTimestamp, raiseTimestampObj);
+
+				const String firstLog = "Unhandled exception raised at {RaiseTimestamp}.";
+				const String nextLog = firstLog + " Previous raise was at {PreviousRaiseTimestamp}.";
+				var (log, props) =
+					previousRaiseTimestampObj switch {
+						null => (firstLog, new[] { raiseTimestampObj }),
+						{ } => (nextLog, new[] { raiseTimestampObj, previousRaiseTimestampObj })
+					};
+
+				Log.Fatal(exception, log, props);
+				var missedGlobalLogger = Log.IsEnabled(LogEventLevel.Fatal);
+				if(CreateCrashLoggerIfRequired(logName, raiseTimestamp, missedGlobalLogger) is { } crashLogger)
+					crashLogger.Fatal(exception, log, props);
+			}
+
+			static Worker () {
+				appDomain = AppDomain.CurrentDomain;
+				options = CrashLoggerOptions.Version2();
+
+				appDomain.UnhandledException +=
+					(_, args) =>
+						OnCrash(
+							nameof(AppDomain.UnhandledException),
+							args.ExceptionObject switch {
+								Exception exception => exception,
+								var exceptionObject => new NonNativeException(exceptionObject)
+							});
+				TaskScheduler.UnobservedTaskException +=
+					(_, args) => OnCrash(nameof(TaskScheduler.UnobservedTaskException), args.Exception);
+				appDomain.ProcessExit +=
+					(_, _) => Log.CloseAndFlush();
+			}
+
+			public static void Awake () { }
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		static void ValidatePath (String? path, String argName) {
+			[MethodImpl(MethodImplOptions.NoInlining)]
+			static void ThrowPathIsNullOrEmpty (String argName) =>
+				throw new ArgumentException("Path is null or empty.", argName);
+
+			[MethodImpl(MethodImplOptions.NoInlining)]
+			static void ThrowPathContainsInvalidChar (String path, String argName, Int32 invalidCharIndex) =>
+				throw new ArgumentException(
+					$"Path '{path}' contains invalid character '{path[invalidCharIndex]}' at {invalidCharIndex}.",
+					argName);
+
+			if(String.IsNullOrEmpty(path))
+				ThrowPathIsNullOrEmpty(nameof(path));
+			else if(path!.IndexOfAny(Path.GetInvalidPathChars()) is >= 0 and var invalidCharIndex)
+				ThrowPathContainsInvalidChar(path, nameof(path), invalidCharIndex);
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		static void ValidateWriteCondition (CrashLogWriteCondition writeCondition, String argName) {
+			[MethodImpl(MethodImplOptions.NoInlining)]
+			static void ThrowWriteConditionIsNotValid (CrashLogWriteCondition writeCondition, String argName) =>
+				throw new ArgumentException($"Crash log write condition {writeCondition} is not valid.", argName);
+
+			var notValid =
+				writeCondition switch {
+					CrashLogWriteCondition.Never => false,
+					CrashLogWriteCondition.Always => false,
+					CrashLogWriteCondition.IfGlobalLoggerMissed => false,
+					_ => true
+				};
+			if(notValid) ThrowWriteConditionIsNotValid(writeCondition, argName);
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static void Activate () => Worker.Awake();
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static void Activate (String crashLogRootPath) {
+			ValidatePath(crashLogRootPath, nameof(crashLogRootPath));
+			Worker.options =
+				new CrashLoggerOptions {
+					writeToConsole = CrashLogWriteCondition.IfGlobalLoggerMissed,
+					writeToFile = CrashLogWriteCondition.Always,
+					crashLogRootPath = crashLogRootPath
+				};
+		}
+
+		public static void Activate (CrashLoggerOptions options) {
+			var theOptions = options with { };
+
+			ValidateWriteCondition(theOptions.writeToConsole, nameof(options) + "." + nameof(options.writeToConsole));
+			ValidateWriteCondition(theOptions.writeToFile, nameof(options) + "." + nameof(options.writeToFile));
+			if(theOptions.writeToFile is not CrashLogWriteCondition.Never)
+				ValidatePath(theOptions.crashLogRootPath, nameof(options) + "." + nameof(options.crashLogRootPath));
+
+			Worker.options = theOptions;
 		}
 	}
 }

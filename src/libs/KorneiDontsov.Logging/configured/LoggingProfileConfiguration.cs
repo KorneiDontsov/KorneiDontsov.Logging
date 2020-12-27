@@ -19,7 +19,7 @@ namespace KorneiDontsov.Logging {
 		public LoggingProfileConfiguration (IConfigurationSection profileConf) {
 			this.profileConf = profileConf;
 
-			if(profileConf["minLevel"] is {} minLevelStr) {
+			if(profileConf["minLevel"] is { } minLevelStr) {
 				if(Enum.TryParse(minLevelStr, ignoreCase: true, out LogEventLevel parsedMinLevel))
 					minLevel = parsedMinLevel;
 				else {
@@ -72,10 +72,8 @@ namespace KorneiDontsov.Logging {
 				"true" => true,
 				"false" => false,
 				null => false,
-
-				{} value =>
-				throw
-					new LoggingConfigurationException(
+				{ } value =>
+					throw new LoggingConfigurationException(
 						$"Expected '{profileConf.Path}:sync' to be boolean, but accepted '{value}'.")
 			};
 
@@ -83,17 +81,12 @@ namespace KorneiDontsov.Logging {
 			var outputConf = profileConf.GetSection("output");
 			if(! outputConf.Exists())
 				throw new LoggingConfigurationException($"Missed '{profileConf}.output'.");
-			else if(outputConf.GetChildren().ToList() is var outputArrItems && outputArrItems.Count is 0)
+			else if(outputConf.GetChildren().ToList() is not ({ Count: > 0 } and { } outputArrItems))
 				throw new LoggingConfigurationException($"'{profileConf}:output' is not a string array.");
 			else {
 				var sb = new StringBuilder(256);
-				using var e = outputArrItems.GetEnumerator();
-
-				e.MoveNext();
-				sb.Append(e.Current.Value);
-
-				while(e.MoveNext()) sb.Append("{NewLine}").Append(e.Current.Value);
-
+				foreach(var outputArrItem in outputArrItems)
+					sb.Append(outputArrItem.Value).Append("{NewLine}");
 				return sb.ToString();
 			}
 		}

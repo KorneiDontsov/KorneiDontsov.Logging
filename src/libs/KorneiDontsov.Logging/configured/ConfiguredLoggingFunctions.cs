@@ -1,4 +1,4 @@
-﻿// Copyright (c) Kornei Dontsov. All Rights Reserved. Licensed under the MIT.
+// Copyright (c) Kornei Dontsov. All Rights Reserved. Licensed under the MIT.
 // See LICENSE in the project root for license information.
 
 namespace KorneiDontsov.Logging {
@@ -10,6 +10,7 @@ namespace KorneiDontsov.Logging {
 	using Serilog.Core;
 	using System;
 	using System.Collections.Generic;
+	using System.Linq;
 
 	public static class ConfiguredLoggingFunctions {
 		/// <exception cref = "LoggingConfigurationException" />
@@ -99,12 +100,22 @@ namespace KorneiDontsov.Logging {
 		}
 
 		/// <exception cref = "LoggingConfigurationException" />
+		public static Logger CreateConfiguredLogger
+			(IConfiguration conf,
+			 IEnumerable<ILoggingProfileApplier> profileAppliers,
+			 IEnumerable<ILoggingEnrichmentApplier> enrichmentAppliers) =>
+			CreateConfiguredLogger(
+				conf,
+				profileAppliers,
+				enrichmentAppliers,
+				Enumerable.Empty<ILoggingFilterApplier>());
+
+		/// <exception cref = "LoggingConfigurationException" />
 		public static Logger CreateSharedConfiguredLogger
 			(IConfiguration conf,
 			 IEnumerable<ILoggingProfileApplier> profileAppliers,
-			 IEnumerable<ILoggingEnrichmentApplier> enrichmentAppliers,
-			 IEnumerable<ILoggingFilterApplier> filterAppliers) {
-			var logger = CreateConfiguredLogger(conf, profileAppliers, enrichmentAppliers, filterAppliers);
+			 IEnumerable<ILoggingEnrichmentApplier> enrichmentAppliers) {
+			var logger = CreateConfiguredLogger(conf, profileAppliers, enrichmentAppliers);
 			Log.Logger = logger;
 			return logger;
 		}
@@ -117,16 +128,12 @@ namespace KorneiDontsov.Logging {
 						.AddTransient<ILoggingProfileApplier, ConsoleProfileApplier>()
 						.AddTransient<ILoggingProfileApplier, LogFileProfileApplier>()
 						.AddTransient<ILoggingEnrichmentApplier, ThreadEnrichmentApplier>()
-						.AddSingleton<Microsoft.Extensions.Logging.ILoggerFactory, ConfiguredLoggerFactory>()
+						.AddSingleton<ConfiguredLoggerFactory>()
+						.AddSingleton<Microsoft.Extensions.Logging.ILoggerFactory?>(
+							serviceProvider => serviceProvider.GetService<ConfiguredLoggerFactory>())
 						.AddSingleton<ILogger?>(
-							provider => {
-								var loggerFactory = provider.GetService<Microsoft.Extensions.Logging.ILoggerFactory>();
-								return (loggerFactory as ConfiguredLoggerFactory)?.logger;
-							})
-						.AddSingleton(
-							provider => {
-								var logger = provider.GetService<ILogger?>();
-								return logger is {} ? new AotLogger(logger) : null;
-							}));
+							provider => provider.GetService<ConfiguredLoggerFactory>()?.logger)
+						.AddSingleton<AotLogger?>(
+							provider => provider.GetService<ILogger?>()?.Aot()));
 	}
 }

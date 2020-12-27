@@ -32,10 +32,10 @@ namespace KorneiDontsov.Logging {
 				conf["path"] switch {
 					null => throw new LoggingConfigurationException($"Missed '{conf.Path}:path'."),
 
-					{} value when IsNullOrWhiteSpace(value) =>
-					throw new LoggingConfigurationException($"'{conf.Path}:path' is empty."),
+					{ } value when IsNullOrWhiteSpace(value) =>
+						throw new LoggingConfigurationException($"'{conf.Path}:path' is empty."),
 
-					{} value => value
+					{ } value => value
 				};
 			var filePath =
 				Regex.Replace(
@@ -62,7 +62,7 @@ namespace KorneiDontsov.Logging {
 						: Path.Combine(environment.contentRootPath, filePath);
 
 				Int64 maxFileSize;
-				if(conf["maxSize"] is {} maxFileSizeStr)
+				if(conf["maxSize"] is { } maxFileSizeStr)
 					try {
 						maxFileSize = Int64.Parse(maxFileSizeStr);
 						if(maxFileSize <= 0) {
@@ -82,7 +82,7 @@ namespace KorneiDontsov.Logging {
 					maxFileSize = 1L * 1024 * 1024 * 1024;
 
 				Int32? retainedFileCountLimit;
-				if(conf["retainedFileCountLimit"] is {} retainedFileCountLimitStr)
+				if(conf["retainedFileCountLimit"] is { } retainedFileCountLimitStr)
 					try {
 						retainedFileCountLimit = Int32.Parse(retainedFileCountLimitStr);
 						if(retainedFileCountLimit <= 0) {
