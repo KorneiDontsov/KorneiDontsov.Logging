@@ -4,7 +4,7 @@
 namespace KorneiDontsov.Logging {
 	using Serilog;
 
-	public static class LoggerFunctions {
+	public static class AotLoggerFunctions {
 		public static AotLogger Aot (this ILogger logger) => new(logger);
 	}
 }
