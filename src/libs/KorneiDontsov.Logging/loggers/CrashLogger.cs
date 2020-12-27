@@ -118,7 +118,7 @@ namespace KorneiDontsov.Logging {
 					};
 
 				Log.Fatal(exception, log, props);
-				var missedGlobalLogger = Log.IsEnabled(LogEventLevel.Fatal);
+				var missedGlobalLogger = ! Log.IsEnabled(LogEventLevel.Fatal);
 				if(CreateCrashLoggerIfRequired(logName, raiseTimestamp, missedGlobalLogger) is { } crashLogger)
 					crashLogger.Fatal(exception, log, props);
 			}
