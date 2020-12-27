@@ -20,8 +20,14 @@ namespace KorneiDontsov.Logging {
 		public ConfiguredLoggerFactory
 			(IConfiguration configuration,
 			 IEnumerable<ILoggingProfileApplier> profileAppliers,
-			 IEnumerable<ILoggingEnrichmentApplier> enrichmentAppliers) {
-			logger = CreateConfiguredLogger(configuration.GetSection("logging"), profileAppliers, enrichmentAppliers);
+			 IEnumerable<ILoggingEnrichmentApplier> enrichmentAppliers,
+			 IEnumerable<ILoggingFilterApplier> filterAppliers) {
+			logger =
+				CreateConfiguredLogger(
+					configuration.GetSection("logging"),
+					profileAppliers,
+					enrichmentAppliers,
+					filterAppliers);
 			(overridenLogger, Log.Logger) = (Log.Logger, logger);
 			provider = new SerilogLoggerProvider(logger, dispose: false);
 		}

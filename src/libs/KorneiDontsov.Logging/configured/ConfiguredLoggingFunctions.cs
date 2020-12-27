@@ -10,13 +10,15 @@ namespace KorneiDontsov.Logging {
 	using Serilog.Core;
 	using System;
 	using System.Collections.Generic;
+	using System.Linq;
 
 	public static class ConfiguredLoggingFunctions {
 		/// <exception cref = "LoggingConfigurationException" />
 		public static Logger CreateConfiguredLogger
 			(IConfiguration conf,
 			 IEnumerable<ILoggingProfileApplier> profileAppliers,
-			 IEnumerable<ILoggingEnrichmentApplier> enrichmentAppliers) {
+			 IEnumerable<ILoggingEnrichmentApplier> enrichmentAppliers,
+			 IEnumerable<ILoggingFilterApplier> filterAppliers) {
 			var profileAppliersMap = new Dictionary<String, ILoggingProfileApplier>();
 			foreach(var profileApplier in profileAppliers) {
 				var profileTypeName = profileApplier.profileTypeName.ToLowerInvariant();
@@ -43,6 +45,19 @@ namespace KorneiDontsov.Logging {
 					enrichmentAppliersMap.Add(enrichmentName, enrichmentApplier);
 			}
 
+			var filterAppliersMap = new Dictionary<String, ILoggingFilterApplier>();
+			foreach(var filterApplier in filterAppliers) {
+				var filterName = filterApplier.filterName.ToLowerInvariant();
+				if(filterAppliersMap.TryGetValue(filterName, out var otherApplier)) {
+					var msg =
+						$"{filterApplier.GetType()} cannot handle filter '{filterName}' "
+						+ $"because it's already handled by {otherApplier.GetType()}.";
+					throw new ArgumentException(msg, nameof(filterAppliers));
+				}
+				else
+					filterAppliersMap.Add(filterName, filterApplier);
+			}
+
 			var loggerConf =
 				new LoggerConfiguration()
 					.Destructure.UsingAttributes()
@@ -59,8 +74,8 @@ namespace KorneiDontsov.Logging {
 				}
 			}
 
-			var enrichmentsConf = conf.GetSection("enrichments").GetChildren();
-			foreach(var enrichmentConf in enrichmentsConf) {
+			var enrichmentConfs = conf.GetSection("enrichments").GetChildren();
+			foreach(var enrichmentConf in enrichmentConfs) {
 				var enrichmentName = enrichmentConf.Key.ToLowerInvariant();
 				if(enrichmentAppliersMap.TryGetValue(enrichmentName, out var enrichmentApplier))
 					enrichmentApplier.Apply(loggerConf.Enrich, enrichmentConf);
@@ -70,8 +85,30 @@ namespace KorneiDontsov.Logging {
 				}
 			}
 
+			var filterConfs = conf.GetSection("filters").GetChildren();
+			foreach(var filterConf in filterConfs) {
+				var filterName = filterConf.Key.ToLowerInvariant();
+				if(filterAppliersMap.TryGetValue(filterName, out var filterApplier))
+					filterApplier.Apply(loggerConf.Filter, filterConf);
+				else {
+					var msg = $"'{filterConf.Path}:type': filter '{filterName}' is not known.";
+					throw new LoggingConfigurationException(msg);
+				}
+			}
+
 			return loggerConf.CreateLogger();
 		}
+
+		/// <exception cref = "LoggingConfigurationException" />
+		public static Logger CreateConfiguredLogger
+			(IConfiguration conf,
+			 IEnumerable<ILoggingProfileApplier> profileAppliers,
+			 IEnumerable<ILoggingEnrichmentApplier> enrichmentAppliers) =>
+			CreateConfiguredLogger(
+				conf,
+				profileAppliers,
+				enrichmentAppliers,
+				Enumerable.Empty<ILoggingFilterApplier>());
 
 		/// <exception cref = "LoggingConfigurationException" />
 		public static Logger CreateSharedConfiguredLogger
