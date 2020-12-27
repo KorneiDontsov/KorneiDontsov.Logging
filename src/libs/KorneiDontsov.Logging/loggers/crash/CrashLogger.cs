@@ -5,7 +5,6 @@ namespace KorneiDontsov.Logging {
 	using Serilog;
 	using Serilog.Core;
 	using Serilog.Events;
-	using Serilog.Sinks.SystemConsole.Themes;
 	using System;
 	using System.Globalization;
 	using System.IO;
@@ -14,22 +13,6 @@ namespace KorneiDontsov.Logging {
 	using static System.Threading.Interlocked;
 
 	public static class CrashLogger {
-		sealed class CrashLogConsoleTheme: ConsoleTheme {
-			public static CrashLogConsoleTheme shared { get; } = new();
-
-			public override Boolean CanBuffer => false;
-
-			protected override Int32 ResetCharCount => 0;
-
-			public override Int32 Set (TextWriter output, ConsoleThemeStyle style) {
-				Console.ForegroundColor = ConsoleColor.DarkRed;
-				return 0;
-			}
-
-			public override void Reset (TextWriter output) =>
-				Console.ResetColor();
-		}
-
 		static class Worker {
 			static readonly AppDomain appDomain;
 
