@@ -18,21 +18,8 @@ namespace KorneiDontsov.Logging {
 		/// <exception cref = "LoggingConfigurationException" />
 		public LoggingProfileConfiguration (IConfigurationSection profileConf) {
 			this.profileConf = profileConf;
-
-			if(profileConf["minLevel"] is {} minLevelStr) {
-				if(Enum.TryParse(minLevelStr, ignoreCase: true, out LogEventLevel parsedMinLevel))
-					minLevel = parsedMinLevel;
-				else {
-					var msg = $"'{profileConf.Path}:minLevel' has invalid value '{minLevelStr}'.";
-					throw new LoggingConfigurationException(msg);
-				}
-			}
-			else
-				minLevel = LogEventLevel.Verbose;
-
-			profileTypeName =
-				profileConf["type"]?.ToLowerInvariant()
-				?? throw new LoggingConfigurationException($"Missed '{profileConf.Path}:type'.");
+			minLevel = profileConf.ReadEnum<LogEventLevel>("minLevel", defaultValue: LogEventLevel.Verbose);
+			profileTypeName = profileConf.ReadString("type").ToLowerInvariant();
 		}
 
 		/// <inheritdoc />
@@ -68,32 +55,15 @@ namespace KorneiDontsov.Logging {
 			profileConf.GetReloadToken();
 
 		public Boolean GetSyncValue () =>
-			profileConf["sync"]?.ToLowerInvariant() switch {
-				"true" => true,
-				"false" => false,
-				null => false,
-
-				{} value =>
-				throw
-					new LoggingConfigurationException(
-						$"Expected '{profileConf.Path}:sync' to be boolean, but accepted '{value}'.")
-			};
+			profileConf.ReadBoolean("sync", defaultValue: false);
 
 		public String GetOutputTemplate () {
-			var outputConf = profileConf.GetSection("output");
-			if(! outputConf.Exists())
-				throw new LoggingConfigurationException($"Missed '{profileConf}.output'.");
-			else if(outputConf.GetChildren().ToList() is var outputArrItems && outputArrItems.Count is 0)
-				throw new LoggingConfigurationException($"'{profileConf}:output' is not a string array.");
+			if(profileConf.GetSection("output").GetChildren().ToList() is not { Count: > 0 } outputArrItems)
+				throw new LoggingConfigurationException($"'Missed {profileConf}:output'.");
 			else {
 				var sb = new StringBuilder(256);
-				using var e = outputArrItems.GetEnumerator();
-
-				e.MoveNext();
-				sb.Append(e.Current.Value);
-
-				while(e.MoveNext()) sb.Append("{NewLine}").Append(e.Current.Value);
-
+				foreach(var outputArrItem in outputArrItems)
+					sb.Append(outputArrItem.Value).Append("{NewLine}");
 				return sb.ToString();
 			}
 		}

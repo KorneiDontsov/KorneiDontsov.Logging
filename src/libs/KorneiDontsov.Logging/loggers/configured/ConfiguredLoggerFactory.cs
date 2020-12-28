@@ -14,25 +14,28 @@ namespace KorneiDontsov.Logging {
 
 	class ConfiguredLoggerFactory: ILoggerFactory {
 		public Logger logger { get; }
+		Serilog.ILogger overridenLogger { get; }
 		SerilogLoggerProvider provider { get; }
-
-		ConfiguredLoggerFactory (Logger logger) {
-			this.logger = logger;
-			provider = new SerilogLoggerProvider(logger, dispose: false);
-		}
 
 		public ConfiguredLoggerFactory
 			(IConfiguration configuration,
 			 IEnumerable<ILoggingProfileApplier> profileAppliers,
-			 IEnumerable<ILoggingEnrichmentApplier> enrichmentAppliers):
-			this(
-				CreateSharedConfiguredLogger(
+			 IEnumerable<ILoggingEnrichmentApplier> enrichmentAppliers,
+			 IEnumerable<ILoggingFilterApplier> filterAppliers,
+			 OnLoggerConfigurationLoaded? onLoggerConfigurationLoaded = null) {
+			logger =
+				CreateConfiguredLogger(
 					configuration.GetSection("logging"),
 					profileAppliers,
-					enrichmentAppliers)) { }
+					enrichmentAppliers,
+					filterAppliers,
+					onLoggerConfigurationLoaded);
+			(overridenLogger, Log.Logger) = (Log.Logger, logger);
+			provider = new(logger, dispose: false);
+		}
 
 		void IDisposable.Dispose () {
-			Log.CloseAndFlush();
+			Log.Logger = overridenLogger;
 			logger.Dispose();
 		}
 

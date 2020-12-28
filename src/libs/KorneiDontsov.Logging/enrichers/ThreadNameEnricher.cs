@@ -9,8 +9,8 @@ namespace KorneiDontsov.Logging {
 	public sealed class ThreadNameEnricher: ILogEventEnricher {
 		/// <inheritdoc />
 		public void Enrich (LogEvent logEvent, ILogEventPropertyFactory propertyFactory) {
-			if(Thread.CurrentThread.Name is {} threadName)
-				logEvent.AddPropertyIfAbsent(new LogEventProperty("ThreadName", new ScalarValue(threadName)));
+			if(Thread.CurrentThread.Name is { } threadName)
+				logEvent.AddPropertyIfAbsent(new("ThreadName", new ScalarValue(threadName)));
 		}
 	}
 }

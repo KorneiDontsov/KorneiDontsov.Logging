@@ -1,5 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "conf", "conf", "{1A18149D-B8F8-4EB5-ADFE-6BB984C70842}"
+ProjectSection(SolutionItems) = preProject
+	..\.editorconfig = ..\.editorconfig
+	..\.gitattributes = ..\.gitattributes
+EndProjectSection
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "libs", "libs", "{DF94A36C-B953-4DDF-B6D0-C3D013983925}"
 ProjectSection(SolutionItems) = preProject
 	libs\Directory.Build.props = libs\Directory.Build.props
@@ -8,13 +14,16 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KorneiDontsov.Logging", "libs\KorneiDontsov.Logging\KorneiDontsov.Logging.csproj", "{243C49EB-2D0E-4073-A136-FC4AC001FA8E}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "examples", "examples", "{26EA0C98-28BF-449C-8340-F46ABBF828A0}"
+ProjectSection(SolutionItems) = preProject
+	examples\Directory.Build.props = examples\Directory.Build.props
+EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KorneiDontsov.Logging.Example", "examples\KorneiDontsov.Logging.Example\KorneiDontsov.Logging.Example.csproj", "{E6CBD889-15F2-432D-9F37-0B0AB3DBCB42}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "schemas", "schemas", "{3F66DC6C-08B7-4A45-95A8-EBDC28822409}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "schema", "schema", "{3F66DC6C-08B7-4A45-95A8-EBDC28822409}"
 ProjectSection(SolutionItems) = preProject
-	schemas\appsettings.json = schemas\appsettings.json
-	schemas\logging.json = schemas\logging.json
+	..\schema\appsettings.json = ..\schema\appsettings.json
+	..\schema\logging.json = ..\schema\logging.json
 EndProjectSection
 EndProject
 Global

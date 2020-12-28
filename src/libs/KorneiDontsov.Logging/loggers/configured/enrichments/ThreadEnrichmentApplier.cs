@@ -8,24 +8,13 @@ namespace KorneiDontsov.Logging {
 
 	public sealed class ThreadEnrichmentApplier: ILoggingEnrichmentApplier {
 		/// <inheritdoc />
-		public String enrichmentName =>
-			"thread";
+		public String enrichmentName => "thread";
 
 		/// <inheritdoc />
 		public void Apply (LoggerEnrichmentConfiguration enrich, IConfigurationSection conf) {
-			switch(conf.Value?.ToLowerInvariant()) {
-				case "true":
-					enrich.With<ThreadIdEnricher>();
-					enrich.With<ThreadNameEnricher>();
-					break;
-
-				case "false":
-				case null:
-					break;
-
-				default:
-					var msg = $"Expected value '{conf.Path}' to be true or false, but accepted '{conf.Value}'.";
-					throw new LoggingConfigurationException(msg);
+			if(conf.ReadBoolean(defaultValue: false)) {
+				enrich.With<ThreadIdEnricher>();
+				enrich.With<ThreadNameEnricher>();
 			}
 		}
 	}

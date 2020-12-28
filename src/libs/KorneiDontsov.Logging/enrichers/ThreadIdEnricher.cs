@@ -10,7 +10,7 @@ namespace KorneiDontsov.Logging {
 		/// <inheritdoc />
 		public void Enrich (LogEvent logEvent, ILogEventPropertyFactory propertyFactory) {
 			var threadId = Environment.CurrentManagedThreadId;
-			logEvent.AddPropertyIfAbsent(new LogEventProperty("ThreadId", new ScalarValue(threadId)));
+			logEvent.AddPropertyIfAbsent(new("ThreadId", new ScalarValue(threadId)));
 		}
 	}
 }

@@ -4,35 +4,37 @@
 namespace KorneiDontsov.Logging.Example {
 	using Microsoft.Extensions.Hosting;
 	using Serilog;
+	using Serilog.Context;
 	using System;
 	using System.Threading;
 	using System.Threading.Tasks;
 
 	class ServiceExample: IHostedService {
-		IHostApplicationLifetime appLifetime { get; }
-		ILogger logger { get; }
+		readonly ILogger logger;
 
-		public ServiceExample (IHostApplicationLifetime appLifetime, ILogger logger) {
-			this.appLifetime = appLifetime;
-			this.logger = logger.ForContext<ServiceExample>();
-		}
+		public ServiceExample (ILogger<ServiceExample> logger) =>
+			this.logger = logger;
 
 		async void BeginWork () {
-			logger.Information("An error will be thrown after 3 seconds.");
-			await Task.Delay(3_000);
+			logger.Debug("An error will be thrown after 3 seconds.");
+			await Task.Delay(1_500);
 			try {
-				throw new Exception("Exception example.");
+				throw new("Exception example.");
 			}
 			catch(Exception ex) {
-				logger.Error(ex, "Exception example was thrown.");
+				using(LogContext.PushProperty("HasLogContext", true))
+					logger.Error(ex, "Exception example was thrown.");
 			}
-			finally { appLifetime.StopApplication(); }
+			finally {
+				throw new("Crash example.");
+			}
 		}
 
 		/// <inheritdoc />
 		public async Task StartAsync (CancellationToken cancellationToken) {
-			logger.Information("Application will start after 2 seconds.");
-			await Task.Delay(2_000, cancellationToken);
+			logger.Debug("Service will start after 2 seconds.");
+			await Task.Delay(1_500, cancellationToken);
+			logger.Information("Service started.");
 			BeginWork();
 		}
 
