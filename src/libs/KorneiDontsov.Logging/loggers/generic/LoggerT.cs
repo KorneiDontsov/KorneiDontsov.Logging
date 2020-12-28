@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 namespace KorneiDontsov.Logging {
+	using Microsoft.Extensions.DependencyInjection;
 	using Serilog;
 	using Serilog.Core;
 	using Serilog.Events;
@@ -9,13 +10,14 @@ namespace KorneiDontsov.Logging {
 	using System.Collections.Generic;
 
 	public sealed class Logger<TSource>: ILogger<TSource> {
-		readonly Logger? fastImpl;
-
 		readonly ILogger impl;
+		readonly Logger? fastImpl;
+		readonly IServiceProvider? serviceProvider;
 
-		public Logger (ILogger logger) {
+		public Logger (ILogger logger, IServiceProvider? serviceProvider) {
 			impl = logger.ForContext<TSource>();
 			fastImpl = impl as Logger;
+			this.serviceProvider = serviceProvider;
 		}
 
 		/// <inheritdoc />
@@ -32,7 +34,8 @@ namespace KorneiDontsov.Logging {
 
 		/// <inheritdoc />
 		public ILogger<TOtherSource> ForContext<TOtherSource> () =>
-			new Logger<TOtherSource>(impl.ForContext(typeof(TOtherSource)));
+			serviceProvider?.GetService<ILogger<TOtherSource>>()
+			?? new Logger<TOtherSource>(impl.ForContext(typeof(TOtherSource)), serviceProvider);
 
 		/// <inheritdoc />
 		ILogger ILogger.ForContext<TOtherSource> () =>
