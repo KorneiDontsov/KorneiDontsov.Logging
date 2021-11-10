@@ -194,13 +194,9 @@ namespace KorneiDontsov.Logging {
 
 		public static IServiceCollection AddConfiguredLoggerCore (this IServiceCollection services) {
 			services.TryAddSingleton<LoggingAppEnvironment>();
-			return services.AddSingleton<ConfiguredLoggerFactory>()
-				.AddSingleton<Microsoft.Extensions.Logging.ILoggerFactory?>(
-					serviceProvider => serviceProvider.GetService<ConfiguredLoggerFactory>())
-				.AddSingleton<ILogger?>(
-					provider => provider.GetService<ConfiguredLoggerFactory>()?.logger)
-				.AddSingleton<AotLogger?>(
-					provider => provider.GetService<ILogger?>()?.Aot());
+			return services.AddSingleton<ILogger, ConfiguredLogger>()
+				.AddSingleton<Microsoft.Extensions.Logging.ILoggerFactory?, MicrosoftLoggerFactory>()
+				.AddAotLogger();
 		}
 
 		public static IServiceCollection AddConfiguredLogger (this IServiceCollection services) =>

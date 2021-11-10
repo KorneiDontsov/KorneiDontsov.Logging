@@ -87,7 +87,7 @@ namespace KorneiDontsov.Logging {
 
 			static void OnCrash (String logName, Exception exception) {
 				var raiseTimestamp = DateTimeOffset.Now;
-				var raiseTimestampObj = (Object) raiseTimestamp;
+				var raiseTimestampObj = (Object)raiseTimestamp;
 				var previousRaiseTimestampObj = Exchange(ref previousRaiseTimestamp, raiseTimestampObj);
 
 				const String firstLog = "Unhandled exception raised at {RaiseTimestamp}.";
@@ -118,8 +118,6 @@ namespace KorneiDontsov.Logging {
 							});
 				TaskScheduler.UnobservedTaskException +=
 					(_, args) => OnCrash(nameof(TaskScheduler.UnobservedTaskException), args.Exception);
-				appDomain.ProcessExit +=
-					(_, _) => Log.CloseAndFlush();
 			}
 
 			public static void Awake () { }

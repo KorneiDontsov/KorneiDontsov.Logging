@@ -21,7 +21,7 @@ namespace KorneiDontsov.Logging {
 		public ILogger Impl => impl;
 
 		public AotLogger (ILogger impl) {
-			fastImpl = impl as Logger;
+			fastImpl = impl.MayGetFastImpl();
 			this.impl = impl;
 		}
 

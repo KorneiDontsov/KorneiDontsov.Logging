@@ -16,7 +16,7 @@ namespace KorneiDontsov.Logging {
 
 		public Logger (ILogger logger, IServiceProvider? serviceProvider) {
 			impl = logger.ForContext<TSource>();
-			fastImpl = impl as Logger;
+			fastImpl = impl.MayGetFastImpl();
 			this.serviceProvider = serviceProvider;
 		}
 
