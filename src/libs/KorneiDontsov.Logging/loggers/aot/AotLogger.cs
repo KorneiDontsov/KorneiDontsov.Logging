@@ -14,24 +14,29 @@ namespace KorneiDontsov.Logging {
 	/// </summary>
 	public sealed class AotLogger: IDisposable {
 		readonly Logger? fastImpl;
-
 		readonly ILogger impl;
+		readonly Boolean disposable;
 
 		// ReSharper disable once InconsistentNaming
 		public ILogger Impl => impl;
 
-		public AotLogger (ILogger impl) {
+		internal AotLogger (ILogger impl, Boolean disposable) {
 			fastImpl = impl.MayGetFastImpl();
 			this.impl = impl;
+			this.disposable = disposable;
 		}
+
+		public AotLogger (ILogger impl): this(impl, disposable: true) { }
 
 		// ReSharper disable once InconsistentNaming
 		public static AotLogger None { get; } = new(Logger.None);
 
 		/// <inheritdoc />
 		public void Dispose () {
-			if(fastImpl is { }) fastImpl.Dispose();
-			else if(impl is IDisposable disposableImpl) disposableImpl.Dispose();
+			if(disposable) {
+				if(fastImpl is { }) fastImpl.Dispose();
+				else if(impl is IDisposable disposableImpl) disposableImpl.Dispose();
+			}
 		}
 
 		/// <inheritdoc cref = "ILogger.ForContext(ILogEventEnricher)" />
